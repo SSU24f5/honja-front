@@ -1,6 +1,6 @@
-import { Spacing } from '@shared/config/theme';
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
+import { Spacing } from '@/styles/theme';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 

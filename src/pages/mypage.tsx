@@ -2,12 +2,12 @@ import { Platform, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
-import { OlleTrailList } from '@/components/home/OlleTrailList';
-import { WeatherWidget } from '@/components/home/WeatherWidget';
+import { ProfileEditForm } from '@/components/mypage/ProfileEditForm';
+import { StampGrid } from '@/components/mypage/StampGrid';
 import { useTheme } from '@/hooks/use-theme';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/styles/theme';
 
-export default function HomeScreen() {
+export default function MyPageScreen() {
   const safeAreaInsets = useSafeAreaInsets();
   const theme = useTheme();
 
@@ -36,18 +36,20 @@ export default function HomeScreen() {
       contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}
     >
       <ThemedView style={styles.container}>
-        <ThemedView style={styles.heroSection}>
+        <ThemedView style={styles.header}>
           <ThemedText type="subtitle" style={styles.title}>
-            혼자 떠나는 제주 여행
+            마이페이지
           </ThemedText>
           <ThemedText themeColor="textSecondary" style={styles.subtitle}>
-            제주의 바람과 하늘을 만나는 시간
+            프로필 정보를 관리하고 획득한 여행 스탬프를 확인해 보세요
           </ThemedText>
         </ThemedView>
 
-        <WeatherWidget />
+        {/* Profile information & visit count widget */}
+        <ProfileEditForm />
 
-        <OlleTrailList />
+        {/* Stamp board collection widget */}
+        <StampGrid />
       </ThemedView>
     </ScrollView>
   );
@@ -68,7 +70,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.four,
     gap: Spacing.five,
   },
-  heroSection: {
+  header: {
     alignItems: 'flex-start',
     backgroundColor: 'transparent',
     gap: Spacing.one,

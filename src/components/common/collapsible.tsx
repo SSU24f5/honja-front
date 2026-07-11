@@ -1,9 +1,9 @@
-import { Spacing } from '@shared/config/theme';
-import { useTheme } from '@shared/lib/use-theme';
 import { SymbolView } from 'expo-symbols';
 import { type PropsWithChildren, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
+import { useTheme } from '@/hooks/use-theme';
+import { Spacing } from '@/styles/theme';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 

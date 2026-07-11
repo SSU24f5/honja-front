@@ -1,4 +1,3 @@
-import { Colors, MaxContentWidth, Spacing } from '@shared/config/theme';
 import {
   TabList,
   type TabListProps,
@@ -9,6 +8,7 @@ import {
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
 import { Pressable, StyleSheet, useColorScheme, View } from 'react-native';
+import { Colors, MaxContentWidth, Spacing } from '@/styles/theme';
 import { ExternalLink } from './external-link';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
@@ -20,10 +20,16 @@ export default function AppTabs() {
       <TabList asChild>
         <CustomTabList>
           <TabTrigger name="home" href="/" asChild>
-            <TabButton>Home</TabButton>
+            <TabButton>홈</TabButton>
           </TabTrigger>
-          <TabTrigger name="explore" href="/explore" asChild>
-            <TabButton>Explore</TabButton>
+          <TabTrigger name="map" href="/map" asChild>
+            <TabButton>지도</TabButton>
+          </TabTrigger>
+          <TabTrigger name="route" href="/route" asChild>
+            <TabButton>경로</TabButton>
+          </TabTrigger>
+          <TabTrigger name="mypage" href="/mypage" asChild>
+            <TabButton>마이페이지</TabButton>
           </TabTrigger>
         </CustomTabList>
       </TabList>

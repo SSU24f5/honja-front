@@ -27,7 +27,7 @@
   },
   "overrides": [
     {
-      "includes": ["assets/**", "package-lock.json"],
+      "includes": ["src/assets/**", "package-lock.json"],
       "linter": {
         "enabled": false
       },

@@ -1,13 +1,13 @@
 # honja-front
 
-**Expo SDK**를 기반으로 개발하고, **Feature-Sliced Design (FSD)** 아키텍처를 준수하는 React Native 모바일 애플리케이션입니다.
+**Expo SDK**를 기반으로 개발하는 React Native 모바일 애플리케이션입니다.
 
 ---
 
 ## 🛠 기술 스택 (Tech Stack)
 
 *   **프레임워크**: [Expo SDK 57](https://expo.dev) (React Native 0.86)
-*   **아키텍처**: [Feature-Sliced Design (FSD)](https://feature-sliced.design/)
+*   **아키텍처**: 도메인 및 기능 중심의 레이어드 아키텍처
 *   **상태 관리**: 
     *   **클라이언트**: [Zustand](https://github.com/pmndrs/zustand)
     *   **서버**: [TanStack Query v5](https://tanstack.com/query/latest)
@@ -16,22 +16,35 @@
 
 ---
 
-## 📐 디렉터리 구조 (FSD 아키텍처)
+## 📐 디렉터리 구조
 
-프로젝트 구조는 FSD 설계 원칙에 따라 `src/` 디렉터리 아래에 레이어별로 관리됩니다:
+프로젝트 구조는 아래와 같이 관리됩니다:
 
 ```text
 src/
-├── app/          # 전역 설정, 레이아웃, 전역 컨텍스트 프로바이더 (Expo Router 진입점)
-├── pages/        # 화면 단위 페이지 컴포넌트 조합 레이어
-├── widgets/      # 독립적으로 작동 가능한 UI 결합체 (피처와 엔티티의 조합)
-├── features/     # 비즈니스 가치를 제공하는 사용자 상호작용 기능 (예: CounterButton)
-├── entities/     # 비즈니스 도메인 모델, 데이터 구조, 상태 저장소 (예: useCounterStore)
-└── shared/       # 재사용 가능한 공통 유틸리티, 설정, API 클라이언트 및 기초 UI 컴포넌트
-    ├── api/      # Query Client 설정 및 백엔드 API 연동 부
-    ├── config/   # 전역 상수, 환경 변수, 테마 설정 등
-    ├── lib/      # 공통 커스텀 훅 및 헬퍼 함수
-    └── ui/       # 가장 기저에 위치하는 재사용 가능한 기초 UI 컴포넌트 (버튼, 카드, 텍스트 등)
+├── api/                # Axios 클라이언트, 엔드포인트, 에러 핸들링
+│   ├── dto/            #   요청/응답 DTO 타입
+│   └── endpoints/      #   도메인별 API 함수
+├── assets/             # 이미지, 아이콘 등 정적 리소스
+├── bootstrap/          # 앱 초기화 (MSW 등)
+├── components/         # UI 컴포넌트
+│   ├── common/         #   공통 UI (Modal, Dropdown, Layout 등)
+│   ├── home/           #   홈 페이지 관련 컴포넌트 (날씨, 올레길 코스 등)
+│   ├── map/            #   지도 페이지 관련 컴포넌트 (정보 필터, 즐겨찾기 등)
+│   ├── route/          #   경로 페이지 관련 컴포넌트 (여행 경로 생성, 방문 순서 등)
+│   └── mypage/         #   마이페이지 관련 컴포넌트 (프로필 수정, 스탬프 등)
+├── constants/          # 상수 정의
+├── hooks/              # 커스텀 훅
+│   └── queries/        #   TanStack Query 훅
+├── mocks/              # MSW 핸들러
+├── pages/              # 페이지 컴포넌트 (home, map, route, mypage)
+├── providers/          # Context Provider
+├── router/             # 라우트 설정 (탭 네비게이션)
+├── stores/             # Zustand 스토어 (4개 도메인: home, map, route, mypage)
+├── styles/             # 글로벌 스타일, 디자인 토큰
+├── test/               # 테스트 유틸리티, 설정
+├── types/              # 공통 타입 정의
+└── utils/              # 유틸리티 함수
 ```
 
 ---
