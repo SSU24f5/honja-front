@@ -4,6 +4,7 @@ import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
 import { ProfileEditForm } from '@/components/mypage/ProfileEditForm';
 import { StampGrid } from '@/components/mypage/StampGrid';
+import { VisitStatsCard } from '@/components/mypage/VisitStatsCard';
 import { useTheme } from '@/hooks/use-theme';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/styles/theme';
 
@@ -44,6 +45,9 @@ export default function MyPageScreen() {
             프로필 정보를 관리하고 획득한 여행 스탬프를 확인해 보세요
           </ThemedText>
         </ThemedView>
+
+        {/* Visit statistics card */}
+        <VisitStatsCard />
 
         {/* Profile information & visit count widget */}
         <ProfileEditForm />

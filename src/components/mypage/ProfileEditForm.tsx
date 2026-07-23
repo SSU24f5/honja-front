@@ -102,8 +102,8 @@ export function ProfileEditForm() {
           </ThemedView>
         ) : (
           <Pressable onPress={() => setIsEditing(true)} style={[styles.btn, styles.btnEdit]}>
-            <SymbolView name="pencil" tintColor="#007AFF" size={14} />
-            <ThemedText style={styles.btnTextBlue}>프로필 수정</ThemedText>
+            <SymbolView name="pencil" tintColor="#D36D3A" size={14} />
+            <ThemedText style={styles.btnTextBrand}>프로필 수정</ThemedText>
           </Pressable>
         )}
       </ThemedView>
@@ -113,13 +113,13 @@ export function ProfileEditForm() {
       {/* Visit Counter */}
       <ThemedView style={styles.counterSection}>
         <ThemedView style={styles.counterLabel}>
-          <SymbolView name="airplane" tintColor="#30B0C7" size={18} />
+          <SymbolView name="airplane" tintColor="#D36D3A" size={18} />
           <ThemedText type="smallBold">나의 제주 방문 횟수</ThemedText>
         </ThemedView>
 
         <ThemedView style={styles.counterRow}>
           <Pressable onPress={decrementVisit} style={styles.counterBtn}>
-            <SymbolView name="minus" tintColor="#007AFF" size={16} />
+            <SymbolView name="minus" tintColor="#D36D3A" size={16} />
           </Pressable>
 
           <ThemedText type="subtitle" style={styles.countText}>
@@ -127,7 +127,7 @@ export function ProfileEditForm() {
           </ThemedText>
 
           <Pressable onPress={incrementVisit} style={styles.counterBtn}>
-            <SymbolView name="plus" tintColor="#007AFF" size={16} />
+            <SymbolView name="plus" tintColor="#D36D3A" size={16} />
           </Pressable>
         </ThemedView>
       </ThemedView>
@@ -164,9 +164,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
     borderBottomWidth: 1,
-    borderBottomColor: '#007AFF',
+    borderBottomColor: '#D36D3A',
     paddingVertical: 2,
     color: '#000000',
+    fontFamily: 'NEXON_Lv2_Gothic',
   },
   avatarPicker: {
     gap: Spacing.two,
@@ -187,8 +188,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   avatarChipActive: {
-    borderColor: '#007AFF',
-    backgroundColor: '#E6F0FF',
+    borderColor: '#D36D3A',
+    backgroundColor: '#FAF2EE',
   },
   chipText: {
     fontSize: 13,
@@ -212,11 +213,11 @@ const styles = StyleSheet.create({
   },
   btnEdit: {
     borderWidth: 1,
-    borderColor: '#007AFF',
+    borderColor: '#D36D3A',
     alignSelf: 'flex-start',
   },
   btnSave: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#D36D3A',
     flex: 1,
   },
   btnCancel: {
@@ -230,8 +231,8 @@ const styles = StyleSheet.create({
   btnTextBlack: {
     color: '#000000',
   },
-  btnTextBlue: {
-    color: '#007AFF',
+  btnTextBrand: {
+    color: '#D36D3A',
     fontWeight: 'bold',
   },
   divider: {

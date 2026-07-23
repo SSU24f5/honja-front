@@ -13,6 +13,7 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
   return (
     <Text
       style={[
+        styles.baseText,
         { color: theme[themeColor ?? 'text'] },
         type === 'default' && styles.default,
         type === 'title' && styles.title,
@@ -30,6 +31,9 @@ export function ThemedText({ style, type = 'default', themeColor, ...rest }: The
 }
 
 const styles = StyleSheet.create({
+  baseText: {
+    fontFamily: 'NEXON_Lv2_Gothic',
+  },
   small: {
     fontSize: 14,
     lineHeight: 20,

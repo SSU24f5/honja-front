@@ -1,36 +1,45 @@
-import { NativeTabs } from 'expo-router/unstable-native-tabs';
+import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
 import { Colors } from '@/styles/theme';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
-  const colors = Colors[scheme === 'unspecified' ? 'light' : scheme];
+  const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
 
   return (
-    <NativeTabs
-      backgroundColor={colors.background}
-      indicatorColor={colors.backgroundElement}
-      labelStyle={{ selected: { color: colors.text } }}
+    <Tabs
+      screenOptions={{
+        headerShown: false,
+        tabBarStyle: {
+          backgroundColor: colors.background,
+        },
+        tabBarActiveTintColor: colors.text,
+      }}
     >
-      <NativeTabs.Trigger name="index">
-        <NativeTabs.Trigger.Label>홈</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="house.fill" md="home" />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="map">
-        <NativeTabs.Trigger.Label>지도</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="map.fill" md="map" />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="route">
-        <NativeTabs.Trigger.Label>경로</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="location.fill" md="directions" />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="mypage">
-        <NativeTabs.Trigger.Label>마이페이지</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="person.fill" md="person" />
-      </NativeTabs.Trigger>
-    </NativeTabs>
+      <Tabs.Screen
+        name="index"
+        options={{
+          title: '홈',
+        }}
+      />
+      <Tabs.Screen
+        name="map"
+        options={{
+          title: '지도',
+        }}
+      />
+      <Tabs.Screen
+        name="route"
+        options={{
+          title: '경로',
+        }}
+      />
+      <Tabs.Screen
+        name="mypage"
+        options={{
+          title: '마이페이지',
+        }}
+      />
+    </Tabs>
   );
 }

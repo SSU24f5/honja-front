@@ -128,6 +128,7 @@ const styles = StyleSheet.create({
   },
   placeName: {
     fontSize: 14,
+    fontFamily: 'EF_jejudoldam',
   },
   controls: {
     flexDirection: 'row',

@@ -7,13 +7,24 @@ export interface RoutePlace {
   address: string;
 }
 
+export interface SavedRoute {
+  id: string;
+  name: string;
+  dates: string;
+  duration: string;
+  itinerary: RoutePlace[];
+}
+
 interface RouteState {
   itinerary: RoutePlace[];
   recommendations: RoutePlace[];
+  savedRoutes: SavedRoute[];
   addPlaceToRoute: (place: RoutePlace) => void;
   removePlaceFromRoute: (id: string) => void;
   movePlaceUp: (index: number) => void;
   movePlaceDown: (index: number) => void;
+  clearItinerary: () => void;
+  createRoute: (name: string, dates: string, duration: string) => void;
 }
 
 export const useRouteStore = create<RouteState>((set) => ({
@@ -36,6 +47,29 @@ export const useRouteStore = create<RouteState>((set) => ({
     },
     { id: 'rec-2', name: '곽지 해수욕장', category: '관광지', address: '제주 애월읍 곽지리' },
     { id: 'rec-3', name: '우도 도항선 선착장', category: '교통', address: '제주 우도면' },
+  ],
+  savedRoutes: [
+    {
+      id: 'route-1',
+      name: '혼저옵서예',
+      dates: '26.07.10. ~ 26.07.14.',
+      duration: '4박 5일',
+      itinerary: [
+        { id: 'route-p1', name: '제주국제공항', category: '교통', address: '제주 공항로 2' },
+        {
+          id: 'route-p2',
+          name: '함덕 해수욕장',
+          category: '관광지',
+          address: '제주 조천읍 함덕리',
+        },
+        {
+          id: 'route-p3',
+          name: '에코랜드 테마파크',
+          category: '관광지',
+          address: '제주 번영로 1278-169',
+        },
+      ],
+    },
   ],
   addPlaceToRoute: (place) =>
     set((state) => {
@@ -70,5 +104,23 @@ export const useRouteStore = create<RouteState>((set) => ({
       newItinerary[index] = newItinerary[index + 1];
       newItinerary[index + 1] = temp;
       return { itinerary: newItinerary };
+    }),
+  clearItinerary: () =>
+    set({
+      itinerary: [],
+    }),
+  createRoute: (name, dates, duration) =>
+    set((state) => {
+      const newRoute: SavedRoute = {
+        id: `route-${Date.now()}`,
+        name,
+        dates,
+        duration,
+        itinerary: [...state.itinerary],
+      };
+      return {
+        savedRoutes: [...state.savedRoutes, newRoute],
+        itinerary: [],
+      };
     }),
 }));

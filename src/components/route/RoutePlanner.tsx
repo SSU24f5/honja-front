@@ -38,7 +38,9 @@ export function RoutePlanner() {
 
                 <ThemedView style={styles.placeCard}>
                   <ThemedView style={styles.placeInfo}>
-                    <ThemedText type="smallBold">{place.name}</ThemedText>
+                    <ThemedText type="smallBold" style={styles.routeName}>
+                      {place.name}
+                    </ThemedText>
                     <ThemedText type="small" themeColor="textSecondary" style={styles.placeAddress}>
                       {place.address}
                     </ThemedText>
@@ -69,7 +71,9 @@ export function RoutePlanner() {
           {recommendations.map((place) => (
             <ThemedView key={place.id} style={styles.recCard}>
               <ThemedView style={styles.recText}>
-                <ThemedText type="smallBold">{place.name}</ThemedText>
+                <ThemedText type="smallBold" style={styles.routeName}>
+                  {place.name}
+                </ThemedText>
                 <ThemedText type="small" themeColor="textSecondary">
                   {place.category}
                 </ThemedText>
@@ -193,5 +197,8 @@ const styles = StyleSheet.create({
   },
   addButton: {
     padding: Spacing.one,
+  },
+  routeName: {
+    fontFamily: 'EF_jejudoldam',
   },
 });

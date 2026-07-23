@@ -8,6 +8,7 @@ import { Spacing } from '@/styles/theme';
 export function StampGrid() {
   const { stamps, toggleStamp } = useMyPageStore();
 
+  // biome-ignore lint/suspicious/noExplicitAny: Bypassing strict SF symbol catalog type checking
   const getStampIcon = (id: string): any => {
     switch (id) {
       case 'stamp-1':
@@ -49,7 +50,7 @@ export function StampGrid() {
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.header}>
-        <SymbolView name="checkmark.seal.fill" tintColor="#AF52DE" size={20} />
+        <SymbolView name="checkmark.seal.fill" tintColor="#D36D3A" size={20} />
         <ThemedText type="smallBold" style={styles.title}>
           제주 여행 스탬프 북
         </ThemedText>
@@ -130,8 +131,8 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
   },
   stampCellEarned: {
-    borderColor: '#AF52DE',
-    shadowColor: '#AF52DE',
+    borderColor: '#D36D3A',
+    shadowColor: '#D36D3A',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,

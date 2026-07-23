@@ -22,10 +22,17 @@ export function OlleTrailList() {
   return (
     <ThemedView style={styles.container}>
       <ThemedView style={styles.header}>
-        <SymbolView name="shoeprints.fill" tintColor="#007AFF" size={20} />
-        <ThemedText type="smallBold" style={styles.title}>
-          제주 올레길 코스 추천
-        </ThemedText>
+        <ThemedView style={styles.headerLeft}>
+          <SymbolView name="shoeprints.fill" tintColor="#D36D3A" size={20} />
+          <ThemedText type="smallBold" style={styles.title}>
+            제주 올레길 코스 추천
+          </ThemedText>
+        </ThemedView>
+        <Pressable style={({ pressed }) => pressed && styles.pressed}>
+          <ThemedText type="small" themeColor="brandPrimary" style={styles.moreLink}>
+            전체 보기
+          </ThemedText>
+        </Pressable>
       </ThemedView>
 
       <View style={styles.list}>
@@ -54,7 +61,7 @@ export function OlleTrailList() {
                 </ThemedView>
               </ThemedView>
               {trail.completed && (
-                <SymbolView name="checkmark.circle.fill" tintColor="#34C759" size={18} />
+                <SymbolView name="checkmark.circle.fill" tintColor="#D36D3A" size={18} />
               )}
             </ThemedView>
 
@@ -83,11 +90,21 @@ const styles = StyleSheet.create({
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: 'transparent',
+    paddingHorizontal: Spacing.four,
+    marginBottom: Spacing.one,
+  },
+  headerLeft: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.one,
     backgroundColor: 'transparent',
-    paddingHorizontal: Spacing.one,
-    marginBottom: Spacing.one,
+  },
+  moreLink: {
+    fontSize: 12,
+    fontWeight: 'bold',
   },
   title: {
     fontSize: 16,
@@ -104,8 +121,8 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
   },
   cardCompleted: {
-    borderColor: '#34C759',
-    backgroundColor: '#F2FBF4',
+    borderColor: '#D36D3A',
+    backgroundColor: '#FAF2EE',
   },
   pressed: {
     opacity: 0.8,
@@ -124,7 +141,7 @@ const styles = StyleSheet.create({
   },
   courseNum: {
     fontSize: 11,
-    color: '#007AFF',
+    color: '#D36D3A',
     fontWeight: 'bold',
   },
   diffBadge: {

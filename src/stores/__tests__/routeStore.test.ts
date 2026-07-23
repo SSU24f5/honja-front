@@ -76,4 +76,18 @@ describe('useRouteStore', () => {
     expect(useRouteStore.getState().itinerary[2].id).toBe('route-p2');
     expect(useRouteStore.getState().itinerary[1].id).toBe('route-p3');
   });
+
+  it('should clear itinerary', () => {
+    useRouteStore.getState().clearItinerary();
+    expect(useRouteStore.getState().itinerary.length).toBe(0);
+  });
+
+  it('should create route and add to savedRoutes', () => {
+    useRouteStore.setState({ savedRoutes: [] });
+    useRouteStore.getState().createRoute('우도 탐방', '26.07.12. ~ 26.07.13.', '1박 2일');
+
+    expect(useRouteStore.getState().savedRoutes.length).toBe(1);
+    expect(useRouteStore.getState().savedRoutes[0].name).toBe('우도 탐방');
+    expect(useRouteStore.getState().itinerary.length).toBe(0); // Itinerary is cleared upon save
+  });
 });

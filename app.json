@@ -8,7 +8,7 @@
     "scheme": "tempexpoinit",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./src/assets/expo.icon"
+      "supportsTablet": true
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +17,7 @@
         "backgroundImage": "./src/assets/images/android-icon-background.png",
         "monochromeImage": "./src/assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "package": "com.anonymous.tempexpoinit"
     },
     "web": {
       "output": "static",
@@ -37,7 +37,8 @@
           "image": "./src/assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      "expo-asset"
     ],
     "experiments": {
       "typedRoutes": true,

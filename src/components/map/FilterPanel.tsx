@@ -96,8 +96,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   chipActive: {
-    backgroundColor: '#007AFF',
-    borderColor: '#007AFF',
+    backgroundColor: '#D36D3A',
+    borderColor: '#D36D3A',
   },
   chipText: {
     fontSize: 13,

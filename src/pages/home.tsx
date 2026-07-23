@@ -1,9 +1,10 @@
 import { Platform, ScrollView, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
+import { CalendarSlider } from '@/components/home/CalendarSlider';
 import { OlleTrailList } from '@/components/home/OlleTrailList';
 import { WeatherWidget } from '@/components/home/WeatherWidget';
+import { WelcomeBanner } from '@/components/home/WelcomeBanner';
 import { useTheme } from '@/hooks/use-theme';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/styles/theme';
 
@@ -36,14 +37,9 @@ export default function HomeScreen() {
       contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}
     >
       <ThemedView style={styles.container}>
-        <ThemedView style={styles.heroSection}>
-          <ThemedText type="subtitle" style={styles.title}>
-            혼자 떠나는 제주 여행
-          </ThemedText>
-          <ThemedText themeColor="textSecondary" style={styles.subtitle}>
-            제주의 바람과 하늘을 만나는 시간
-          </ThemedText>
-        </ThemedView>
+        <CalendarSlider />
+
+        <WelcomeBanner />
 
         <WeatherWidget />
 
