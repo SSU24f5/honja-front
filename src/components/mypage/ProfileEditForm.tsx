@@ -1,5 +1,5 @@
 import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Pressable, StyleSheet, TextInput } from 'react-native';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
