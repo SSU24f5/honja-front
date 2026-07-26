@@ -15,6 +15,8 @@ export const Colors = {
     backgroundSelected: '#E0E1E6',
     textSecondary: '#60646C',
     brandPrimary: '#D36D3A',
+    titleColor: '#92390D',
+    hintText: '#D9D9D9',
   },
   dark: {
     text: '#ffffff',
@@ -61,6 +63,7 @@ export const Spacing = {
   four: 24,
   five: 32,
   six: 64,
+  horizontal: 27,
 } as const;
 
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
