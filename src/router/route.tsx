@@ -1,3 +1,3 @@
-import RouteScreen from '@/pages/route';
+import { MyTripsScreen } from "@/pages/MyTripsScreen";
 
-export default RouteScreen;
+export default MyTripsScreen;
