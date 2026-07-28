@@ -1,13 +1,12 @@
 import { useState } from 'react';
 import { FlatList, Pressable, SafeAreaView, StyleSheet, View } from 'react-native';
-import { TabTrigger, type TabTriggerSlotProps } from 'expo-router/ui';
+import { TabTrigger } from 'expo-router/ui';
 import { AppIcon } from '@/components/common/AppIcon';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing } from '@/styles/theme';
-import { TripColors } from '@/styles/tripColors';
 import { useRouteStore, type SavedRoute } from '@/stores/routeStore';
 import { TripCard, type TripCardData } from '@/components/route/TripCard';
 import { DeleteConfirmModal } from '@/components/route/DeleteConfirmModal';
@@ -22,19 +21,6 @@ function toTripCardData(route: SavedRoute): TripCardData {
     dateRangeText: `${route.dates} (${route.duration})`,
     avatars: route.avatars,
   };
-}
-
-// TabButton과 동일한 패턴: TabTrigger가 넘겨주는 props(onPress 등)를 Pressable에 그대로 전달
-function InvitationTrigger({ children, isFocused, ...props }: TabTriggerSlotProps) {
-  const theme = useTheme();
-
-  return (
-    <Pressable {...props}>
-      <ThemedView style={styles.iconButton}>
-        <AppIcon name="envelope" size={20} color={theme.text} />
-      </ThemedView>
-    </Pressable>
-  );
 }
 
 export function MyTripsScreen() {
@@ -57,14 +43,18 @@ export function MyTripsScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemedView type="backgroundElement" style={[styles.container, { backgroundColor: TripColors.screenBackground }]}>
+      <ThemedView type="backgroundElement" style={styles.container}>
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.header}>
-            <ThemedText type="subtitle" style={[styles.headerTitle, { color: TripColors.titleText }]}>
+            <ThemedText type="subtitle" style={styles.headerTitle}>
               내 여행
             </ThemedText>
-            <TabTrigger name="invitation" asChild>
-              <InvitationTrigger />
+            <TabTrigger name="invitation" href="/invitation" asChild>
+              <Pressable>
+                <ThemedView style={styles.iconButton}>
+                  <AppIcon name="envelope" size={20} color={theme.text} />
+                </ThemedView>
+              </Pressable>
             </TabTrigger>
           </View>
 

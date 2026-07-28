@@ -4,20 +4,34 @@ import { ThemedView } from '@/components/common/themed-view';
 import { Spacing } from '@/styles/theme';
 import { TripColors } from '@/styles/tripColors';
 
-interface DeleteConfirmModalProps {
+interface ConfirmModalProps {
   visible: boolean;
+  message: string;
+  confirmLabel: string;
+  cancelLabel?: string;
+  /** 확인 버튼 배경색. 안 넘기면 danger(삭제/거부) 색 사용 */
+  confirmColor?: string;
   onCancel: () => void;
   onConfirm: () => void;
 }
 
-export function DeleteConfirmModal({ visible, onCancel, onConfirm }: DeleteConfirmModalProps) {
+// 수락/거부 등 여러 확인창에서 재사용하는 범용 모달
+export function ConfirmModal({
+  visible,
+  message,
+  confirmLabel,
+  cancelLabel = '취소',
+  confirmColor = TripColors.danger,
+  onCancel,
+  onConfirm,
+}: ConfirmModalProps) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
       <Pressable style={styles.overlay} onPress={onCancel}>
         <Pressable onPress={() => {}} style={styles.sheetWrapper}>
           <ThemedView style={styles.sheet}>
             <ThemedText type="default" style={styles.message}>
-              여행을 삭제하시겠습니까?
+              {message}
             </ThemedText>
 
             <View style={styles.buttonRow}>
@@ -26,16 +40,16 @@ export function DeleteConfirmModal({ visible, onCancel, onConfirm }: DeleteConfi
                 onPress={onCancel}
               >
                 <ThemedText type="smallBold" style={{ color: TripColors.titleText }}>
-                  취소
+                  {cancelLabel}
                 </ThemedText>
               </Pressable>
 
               <Pressable
-                style={[styles.button, { backgroundColor: TripColors.danger }]}
+                style={[styles.button, { backgroundColor: confirmColor }]}
                 onPress={onConfirm}
               >
                 <ThemedText type="smallBold" themeColor="background">
-                  삭제
+                  {confirmLabel}
                 </ThemedText>
               </Pressable>
             </View>

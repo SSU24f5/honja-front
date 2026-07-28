@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import {
   TabList,
   type TabListProps,
@@ -7,18 +8,26 @@ import {
   type TabTriggerSlotProps,
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, useColorScheme, View } from 'react-native';
+import { Pressable, StyleSheet, useColorScheme, View, type LayoutChangeEvent } from 'react-native';
 import { Colors, MaxContentWidth, Spacing } from '@/styles/theme';
 import { ExternalLink } from './external-link';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 export default function AppTabs() {
+  // 떠있는 상단 탭바(CustomTabList)의 실제 렌더링 높이를 측정해서
+  // TabSlot(화면 내용)이 그만큼 아래로 밀리게 함 -> 화면마다 padding 값을 추측할 필요 없음
+  const [tabBarHeight, setTabBarHeight] = useState(0);
+
   return (
     <Tabs>
-      <TabSlot style={{ height: '100%' }} />
+      <TabSlot style={{ height: '100%', paddingTop: tabBarHeight }} />
       <TabList asChild>
-        <CustomTabList>
+        <CustomTabList
+          onLayout={(event: LayoutChangeEvent) => {
+            setTabBarHeight(event.nativeEvent.layout.height);
+          }}
+        >
           <TabTrigger name="home" href="/" asChild>
             <TabButton>홈</TabButton>
           </TabTrigger>
@@ -31,6 +40,8 @@ export default function AppTabs() {
           <TabTrigger name="mypage" href="/mypage" asChild>
             <TabButton>마이페이지</TabButton>
           </TabTrigger>
+          {/* 하단 탭바엔 안 보이지만, TabList 안에 있어야 실제로 라우트로 등록됨 */}
+          <TabTrigger name="invitation" href="/invitation" style={{ display: 'none' }} />
         </CustomTabList>
       </TabList>
     </Tabs>
@@ -52,12 +63,16 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
   );
 }
 
-export function CustomTabList(props: TabListProps) {
+interface CustomTabListProps extends TabListProps {
+  onLayout?: (event: LayoutChangeEvent) => void;
+}
+
+export function CustomTabList({ onLayout, ...props }: CustomTabListProps) {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
 
   return (
-    <View {...props} style={styles.tabListContainer}>
+    <View {...props} onLayout={onLayout} style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
         <ThemedText type="smallBold" style={styles.brandText}>
           Expo Starter

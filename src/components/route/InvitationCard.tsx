@@ -1,34 +1,32 @@
 import { useRef } from 'react';
-import { Animated, Pressable, StyleSheet, View, type ImageSourcePropType } from 'react-native';
+import { Animated, type ImageSourcePropType, Pressable, StyleSheet, View } from 'react-native';
 import { AppIcon } from '@/components/common/AppIcon';
 import { Swipeable } from 'react-native-gesture-handler';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
-import { useTheme } from '@/hooks/use-theme';
 import { Spacing } from '@/styles/theme';
 import { TripColors } from '@/styles/tripColors';
 import { AvatarStack } from './AvatarStack';
 import { TagBadge } from './TagBadge';
 
-// 카드 렌더링에 필요한 데이터 형태 (stores의 SavedRoute를 매핑해서 넘기면 됨)
-export interface TripCardData {
+export interface InvitationCardData {
   id: string;
   tags: string[];
   title: string;
-  description?: string;
   dateRangeText: string;
   avatars?: ImageSourcePropType[];
 }
 
-interface TripCardProps {
-  trip: TripCardData;
-  onRequestDelete: (trip: TripCardData) => void;
+interface InvitationCardProps {
+  invitation: InvitationCardData;
+  onRequestAccept: (invitation: InvitationCardData) => void;
+  onRequestReject: (invitation: InvitationCardData) => void;
 }
 
-export function TripCard({ trip, onRequestDelete }: TripCardProps) {
+export function InvitationCard({ invitation, onRequestAccept, onRequestReject }: InvitationCardProps) {
   const swipeableRef = useRef<Swipeable>(null);
-  const theme = useTheme();
 
+  // 왼쪽으로 스와이프 -> 오른쪽에 수락(그린) 버튼 노출
   const renderRightActions = (
     _progress: Animated.AnimatedInterpolation<number>,
     dragX: Animated.AnimatedInterpolation<number>
@@ -41,14 +39,40 @@ export function TripCard({ trip, onRequestDelete }: TripCardProps) {
 
     return (
       <Pressable
-        style={[styles.deleteAction, { backgroundColor: TripColors.danger }]}
+        style={[styles.actionButton, styles.rightActionButton, { backgroundColor: TripColors.success }]}
         onPress={() => {
           swipeableRef.current?.close();
-          onRequestDelete(trip);
+          onRequestAccept(invitation);
         }}
       >
         <Animated.View style={{ transform: [{ scale }] }}>
-          <AppIcon name="trash" size={24} color={theme.background} />
+          <AppIcon name="exchange" size={22} color="#FFFFFF" />
+        </Animated.View>
+      </Pressable>
+    );
+  };
+
+  // 오른쪽으로 스와이프 -> 왼쪽에 거부(트래시) 버튼 노출
+  const renderLeftActions = (
+    _progress: Animated.AnimatedInterpolation<number>,
+    dragX: Animated.AnimatedInterpolation<number>
+  ) => {
+    const scale = dragX.interpolate({
+      inputRange: [0, 100],
+      outputRange: [0.5, 1],
+      extrapolate: 'clamp',
+    });
+
+    return (
+      <Pressable
+        style={[styles.actionButton, styles.leftActionButton, { backgroundColor: TripColors.danger }]}
+        onPress={() => {
+          swipeableRef.current?.close();
+          onRequestReject(invitation);
+        }}
+      >
+        <Animated.View style={{ transform: [{ scale }] }}>
+          <AppIcon name="trash" size={22} color="#FFFFFF" />
         </Animated.View>
       </Pressable>
     );
@@ -57,41 +81,32 @@ export function TripCard({ trip, onRequestDelete }: TripCardProps) {
   return (
     <Swipeable
       ref={swipeableRef}
+      renderLeftActions={renderLeftActions}
       renderRightActions={renderRightActions}
+      overshootLeft={false}
       overshootRight={false}
       friction={2}
     >
       <ThemedView style={styles.card}>
         <View style={styles.tagRow}>
-          {trip.tags.map((tag) => (
+          {invitation.tags.map((tag) => (
             <TagBadge key={tag} label={tag} />
           ))}
         </View>
 
         <View style={styles.titleRow}>
-          <AvatarStack avatars={trip.avatars ?? []} />
+          <AvatarStack avatars={invitation.avatars ?? []} />
           <ThemedText
             type="subtitle"
             style={[styles.title, { color: TripColors.titleText }]}
             numberOfLines={1}
           >
-            {trip.title}
+            {invitation.title}
           </ThemedText>
         </View>
 
-        {trip.description ? (
-          <ThemedText
-            type="small"
-            themeColor="textSecondary"
-            style={styles.description}
-            numberOfLines={2}
-          >
-            {trip.description}
-          </ThemedText>
-        ) : null}
-
         <ThemedText type="small" themeColor="textSecondary">
-          {trip.dateRangeText}
+          {invitation.dateRangeText}
         </ThemedText>
       </ThemedView>
     </Swipeable>
@@ -121,16 +136,17 @@ const styles = StyleSheet.create({
     lineHeight: 24,
     textAlign: 'right',
   },
-  description: {
-    textAlign: 'right',
-    marginBottom: Spacing.one,
-  },
-  deleteAction: {
+  actionButton: {
     justifyContent: 'center',
     alignItems: 'center',
     width: 88,
     borderRadius: 18,
     marginBottom: Spacing.two + Spacing.half,
+  },
+  rightActionButton: {
     marginRight: Spacing.three,
+  },
+  leftActionButton: {
+    marginLeft: Spacing.three,
   },
 });
