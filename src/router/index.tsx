@@ -1,3 +1,3 @@
-import HomeScreen from '@/pages/home';
+import SignupScreen from '@/pages/signup';
 
-export default HomeScreen;
+export default SignupScreen;
