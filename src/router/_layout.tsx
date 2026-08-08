@@ -20,9 +20,17 @@ export default function TabLayout() {
     return null;
   }
 
+  const MyDefaultTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: '#ffffff',
+    },
+  };
+
   return (
     <QueryProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : MyDefaultTheme}>
         <AnimatedSplashOverlay />
         <AppTabs />
       </ThemeProvider>

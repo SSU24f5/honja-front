@@ -1,13 +1,23 @@
 import { useRouter } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
-import { useEffect, useState } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useEffect, useMemo, useState } from 'react';
+import {
+  BackHandler,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import LeftBackIcon from '@/assets/icon/basic/left_back.svg';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
 import { useTheme } from '@/hooks/use-theme';
-import { useRouteStore } from '@/stores/routeStore';
-import { BottomTabInset, Colors, MaxContentWidth, Spacing } from '@/styles/theme';
+import { type RoutePlace, type SavedRoute, useRouteStore } from '@/stores/routeStore';
+import { BottomTabInset, MaxContentWidth, Spacing } from '@/styles/theme';
+import { PlaceSearchModal } from './PlaceSearchModal';
+import { type DayPlan, type SearchTarget, THEME_TO_COURSE_TYPE } from './constants';
 
 type StepType = 'list' | 'details';
 
@@ -22,10 +32,27 @@ export default function RouteScreen() {
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
   const [selectedDayIdx, setSelectedDayIdx] = useState(0);
 
+  // Day planning state for detail view
+  const [dayPlans, setDayPlans] = useState<Record<number, DayPlan>>({});
+  const [searchModalVisible, setSearchModalVisible] = useState(false);
+  const [searchTarget, setSearchTarget] = useState<SearchTarget | null>(null);
+
   // biome-ignore lint/correctness/useExhaustiveDependencies: Reset selected tab on route change
   useEffect(() => {
     setSelectedDayIdx(0);
+    setDayPlans({});
   }, [selectedRouteId]);
+
+  // Handle back press in search modal
+  useEffect(() => {
+    if (!searchModalVisible) return;
+    const backAction = () => {
+      setSearchModalVisible(false);
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [searchModalVisible]);
 
   const insets = {
     ...safeAreaInsets,
@@ -45,158 +72,194 @@ export default function RouteScreen() {
     },
   });
 
-  const selectedRoute = savedRoutes.find((r) => r.id === selectedRouteId) || savedRoutes[0];
+  const selectedRoute = savedRoutes.find((r) => r.id === selectedRouteId) || null;
+
+  // Parse days from selected route dates
+  const { daysList, month } = useMemo(() => {
+    if (!selectedRoute) return { daysList: [], month: 8 };
+    try {
+      const parts = selectedRoute.dates.split('~');
+      const startParts = parts[0].trim().split('.');
+      const endParts = parts[1].trim().split('.');
+      const sDay = parseInt(startParts[2] || startParts[1], 10);
+      const eDay = parseInt(endParts[2] || endParts[1], 10);
+      const m = parseInt(startParts[1], 10);
+      const list = [];
+      for (let d = sDay; d <= eDay; d++) {
+        list.push(d);
+      }
+      return { daysList: list, month: m };
+    } catch {
+      return { daysList: [10, 11, 12, 13, 14], month: 7 };
+    }
+  }, [selectedRoute]);
+
+  const currentPlan = useMemo(() => {
+    return dayPlans[selectedDayIdx] || { start: null, waypoints: [], end: null };
+  }, [dayPlans, selectedDayIdx]);
+
+  const openSearch = (type: 'start' | 'waypoint' | 'end', waypointIndex?: number) => {
+    setSearchTarget({ dayIndex: selectedDayIdx, type, waypointIndex });
+    setSearchModalVisible(true);
+  };
+
+  const handleSelectPlace = (place: RoutePlace) => {
+    if (!searchTarget) return;
+    const { dayIndex, type, waypointIndex } = searchTarget;
+
+    setDayPlans((prev) => {
+      const existing = prev[dayIndex] || { start: null, waypoints: [], end: null };
+      if (type === 'start') {
+        return { ...prev, [dayIndex]: { ...existing, start: place } };
+      } else if (type === 'end') {
+        return { ...prev, [dayIndex]: { ...existing, end: place } };
+      } else {
+        if (typeof waypointIndex === 'number') {
+          const updatedWaypoints = [...existing.waypoints];
+          updatedWaypoints[waypointIndex] = place;
+          return { ...prev, [dayIndex]: { ...existing, waypoints: updatedWaypoints } };
+        } else {
+          if (existing.waypoints.some((wp) => wp.id === place.id)) return prev;
+          return { ...prev, [dayIndex]: { ...existing, waypoints: [...existing.waypoints, place] } };
+        }
+      }
+    });
+
+    setSearchModalVisible(false);
+    setSearchTarget(null);
+  };
+
+  const handleRemovePlace = (type: 'start' | 'end') => {
+    setDayPlans((prev) => {
+      const existing = prev[selectedDayIdx] || { start: null, waypoints: [], end: null };
+      if (type === 'start') return { ...prev, [selectedDayIdx]: { ...existing, start: null } };
+      if (type === 'end') return { ...prev, [selectedDayIdx]: { ...existing, end: null } };
+      return prev;
+    });
+  };
+
+  const handleRemoveWaypoint = (index: number) => {
+    setDayPlans((prev) => {
+      const existing = prev[selectedDayIdx] || { start: null, waypoints: [], end: null };
+      const updatedWaypoints = [...existing.waypoints];
+      updatedWaypoints.splice(index, 1);
+      return { ...prev, [selectedDayIdx]: { ...existing, waypoints: updatedWaypoints } };
+    });
+  };
 
   return (
-    <ScrollView
-      style={[styles.scrollView, { backgroundColor: theme.background }]}
-      contentInset={insets}
-      contentContainerStyle={[styles.contentContainer, contentPlatformStyle]}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      style={{ flex: 1 }}
     >
-      <ThemedView style={[styles.container, { backgroundColor: theme.background }]}>
-        {/* STEP 1: ROUTE LIST */}
-        {step === 'list' && (
-          <ThemedView style={styles.stepContainer}>
-            <ThemedView style={styles.header}>
-              <ThemedText type="subtitle" style={styles.title}>
-                내 경로
-              </ThemedText>
-              <ThemedText themeColor="textSecondary" style={styles.subtitle}>
-                내가 계획한 제주도 여행 일정 리스트
-              </ThemedText>
-            </ThemedView>
+      {!searchModalVisible && (
+        <ScrollView
+          style={[s.scrollView, { backgroundColor: theme.background }]}
+          contentInset={insets}
+          contentContainerStyle={[s.contentContainer, contentPlatformStyle]}
+        >
+          <ThemedView style={[s.container, { backgroundColor: theme.background }]}>
+            {/* ── STEP 1: 내 여행 목록 ── */}
+            {step === 'list' && (
+              <View style={s.stepContainer}>
+                {/* Header */}
+                <View style={s.listHeader}>
+                  <ThemedText style={s.listTitle}>내 여행</ThemedText>
+                  <Pressable style={s.mailIcon}>
+                    <ThemedText style={{ fontSize: 24 }}>✉️</ThemedText>
+                  </Pressable>
+                </View>
 
-            <View style={styles.list}>
-              {savedRoutes.map((route) => (
-                <ThemedView key={route.id} style={styles.routeCard} type="backgroundElement">
-                  <ThemedView style={styles.routeCardHeader}>
-                    <SymbolView name="map.fill" tintColor="#D36D3A" size={18} />
-                    <ThemedText type="smallBold" style={styles.routeNameText}>
-                      {route.name}
-                    </ThemedText>
-                  </ThemedView>
-                  <ThemedText type="small" themeColor="textSecondary" style={styles.routeDates}>
-                    {route.dates} ({route.duration})
-                  </ThemedText>
-                  <ThemedText
-                    type="small"
-                    themeColor="textSecondary"
-                    style={styles.routeDestinations}
-                  >
-                    경유지: {route.itinerary.map((p) => p.name).join(' → ')}
-                  </ThemedText>
-                  <ThemedView style={styles.routeCardActions}>
+                {/* Route Cards */}
+                <View style={s.routeList}>
+                  {savedRoutes.map((route) => (
                     <Pressable
+                      key={route.id}
                       onPress={() => {
                         setSelectedRouteId(route.id);
                         setStep('details');
                       }}
-                      style={({ pressed }) => [
-                        styles.cardBtn,
-                        styles.cardBtnPrimary,
-                        pressed && styles.pressed,
-                      ]}
+                      style={({ pressed }) => [s.routeCard, pressed && s.pressed]}
                     >
-                      <ThemedText style={styles.cardBtnTextPrimary}>상세 보기</ThemedText>
+                      <View style={s.routeCardTop}>
+                        <ThemedText style={s.routeCardDate}>
+                          {route.dates.replace(/\./g, '/')}
+                        </ThemedText>
+                        <View style={s.routeCardBadge}>
+                          <ThemedText style={s.routeCardBadgeText}>
+                            {route.theme || '일반'}
+                          </ThemedText>
+                        </View>
+                      </View>
+                      <ThemedText style={s.routeCardName}>{route.name}</ThemedText>
+                      {route.itinerary.length > 0 && (
+                        <ThemedText style={s.routeCardDesc}>
+                          {route.itinerary.map((p) => p.name).join(' → ')}
+                        </ThemedText>
+                      )}
                     </Pressable>
-                    <Pressable
-                      style={({ pressed }) => [
-                        styles.cardBtn,
-                        styles.cardBtnSecondary,
-                        pressed && styles.pressed,
-                      ]}
-                    >
-                      <ThemedText style={styles.cardBtnTextSecondary}>지도 보기</ThemedText>
-                    </Pressable>
-                  </ThemedView>
-                </ThemedView>
-              ))}
-            </View>
+                  ))}
 
-            <Pressable
-              onPress={() => router.push('/route/create' as any)}
-              style={({ pressed }) => [styles.actionBtn, pressed && styles.pressed]}
-            >
-              <ThemedText style={styles.actionBtnText}>경로 생성하기</ThemedText>
-            </Pressable>
-          </ThemedView>
-        )}
-
-        {/* STEP 2: ROUTE DETAILS */}
-        {step === 'details' && selectedRoute && (
-          <ThemedView style={styles.stepContainer}>
-            <View style={styles.detailsHeaderRow}>
-              <ThemedText style={styles.detailsHeaderTitle}>내 여행</ThemedText>
-              <Pressable
-                onPress={() => {
-                  router.push('/route/create' as any);
-                }}
-                style={styles.editBtn}
-              >
-                <ThemedText style={styles.editBtnText}>여행 수정하기</ThemedText>
-              </Pressable>
-            </View>
-
-            {/* Summary Card */}
-            <View style={styles.detailsSummaryCard}>
-              <View style={styles.detailsSummaryBadges}>
-                <View style={styles.summaryBadgeTheme}>
-                  <ThemedText style={styles.summaryBadgeThemeText}>
-                    {selectedRoute.theme || '일반'}
-                  </ThemedText>
+                  {savedRoutes.length === 0 && (
+                    <View style={s.emptyState}>
+                      <ThemedText style={s.emptyStateText}>
+                        아직 생성된 여행이 없습니다.
+                      </ThemedText>
+                    </View>
+                  )}
                 </View>
-                <View style={styles.summaryBadgeCompanion}>
-                  <ThemedText style={styles.summaryBadgeCompanionText}>
+
+                {/* 여행 생성하기 버튼 */}
+                <Pressable
+                  onPress={() => router.push('/route/create' as any)}
+                  style={({ pressed }) => [s.createBtn, pressed && s.pressed]}
+                >
+                  <ThemedText style={s.createBtnText}>여행 생성하기</ThemedText>
+                </Pressable>
+              </View>
+            )}
+
+            {/* ── STEP 2: 상세보기 (디자인 2번) ── */}
+            {step === 'details' && selectedRoute && (
+              <View style={s.stepContainer}>
+                {/* Back Arrow */}
+                <View style={s.detailHeaderRow}>
+                  <Pressable onPress={() => setStep('list')} hitSlop={12}>
+                    <LeftBackIcon width={11} height={17} />
+                  </Pressable>
+                </View>
+
+                {/* Route Title + 초대하기 */}
+                <View style={s.detailTitleRow}>
+                  <ThemedText style={s.detailTitle}>{selectedRoute.name}</ThemedText>
+                  <Pressable style={s.inviteBtn}>
+                    <ThemedText style={s.inviteBtnText}>초대하기</ThemedText>
+                  </Pressable>
+                </View>
+
+                {/* Summary Card */}
+                <View style={s.detailSummaryCard}>
+                  <View style={s.detailSummaryTop}>
+                    <ThemedText style={s.detailSummaryDate}>
+                      {selectedRoute.dates.replace(/\./g, '/')}
+                    </ThemedText>
+                    <View style={s.detailSummaryBadge}>
+                      <ThemedText style={s.detailSummaryBadgeText}>
+                        {selectedRoute.theme || '일반'}
+                      </ThemedText>
+                    </View>
+                  </View>
+                  <ThemedText style={s.detailSummaryDesc}>
                     {selectedRoute.companion || '혼자'}
                   </ThemedText>
                 </View>
-              </View>
 
-              <View style={styles.detailsSummaryTitleRow}>
-                <View style={styles.avatarRow}>
-                  <View style={styles.avatarCircle}>
-                    <ThemedText style={styles.avatarEmoji}>👩</ThemedText>
-                  </View>
-                  <View style={[styles.avatarCircle, { marginLeft: -8 }]}>
-                    <ThemedText style={styles.avatarEmoji}>👨</ThemedText>
-                  </View>
-                </View>
-                <ThemedText style={styles.detailsSummaryTitleText}>{selectedRoute.name}</ThemedText>
-              </View>
-
-              <View style={styles.detailsSummaryDateRow}>
-                <ThemedText style={styles.detailsSummaryDateText}>
-                  {selectedRoute.dates} ({selectedRoute.duration})
-                </ThemedText>
-              </View>
-            </View>
-
-            {/* Day Select Tabs */}
-            {(() => {
-              const parseDays = () => {
-                try {
-                  const parts = selectedRoute.dates.split('~');
-                  const startParts = parts[0].trim().split('.');
-                  const endParts = parts[1].trim().split('.');
-                  const sDay = parseInt(startParts[2] || startParts[1], 10);
-                  const eDay = parseInt(endParts[2] || endParts[1], 10);
-                  const list = [];
-                  for (let d = sDay; d <= eDay; d++) {
-                    list.push(d);
-                  }
-                  return { list, month: parseInt(startParts[1], 10) };
-                } catch (_e) {
-                  return { list: [10, 11, 12, 13, 14], month: 7 };
-                }
-              };
-              const { list: daysList, month } = parseDays();
-
-              return (
-                <View style={styles.tabsContainer}>
+                {/* Day Tabs */}
+                <View style={s.dayTabsRow}>
                   <ScrollView
                     horizontal
                     showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={styles.tabsScrollContent}
+                    contentContainerStyle={s.dayTabsContent}
                   >
                     {daysList.map((dayNum, idx) => {
                       const isActive = selectedDayIdx === idx;
@@ -204,10 +267,10 @@ export default function RouteScreen() {
                         <Pressable
                           key={dayNum}
                           onPress={() => setSelectedDayIdx(idx)}
-                          style={[styles.dayTab, isActive && styles.dayTabActive]}
+                          style={[s.dayTab, isActive && s.dayTabActive]}
                         >
                           <ThemedText
-                            style={[styles.dayTabText, isActive && styles.dayTabTextActive]}
+                            style={[s.dayTabText, isActive && s.dayTabTextActive]}
                           >
                             {month}/{dayNum}
                           </ThemedText>
@@ -216,80 +279,97 @@ export default function RouteScreen() {
                     })}
                   </ScrollView>
                 </View>
-              );
-            })()}
 
-            {/* Place List */}
-            {(() => {
-              const dayPlaces = selectedRoute.itinerary.filter(
-                (place) => place.day === selectedDayIdx,
-              );
-
-              return (
-                <View style={styles.detailPlacesList}>
-                  {dayPlaces.map((place, idx) => {
-                    const isStart = place.type === 'start' || idx === 0;
-                    const isEnd = place.type === 'end' || (idx === dayPlaces.length - 1 && idx > 0);
-                    const isWaypoint = !isStart && !isEnd;
-
-                    return (
-                      <View key={place.id} style={styles.detailPlaceBox}>
-                        <View style={styles.detailPlaceMain}>
-                          <ThemedText style={styles.detailPlaceName}>{place.name}</ThemedText>
-                          <ThemedText style={styles.detailPlaceAddr}>{place.address}</ThemedText>
-                        </View>
-
-                        {isWaypoint && (
-                          <View style={styles.detailPlaceDistanceRow}>
-                            <ThemedText style={styles.detailDistanceText}>
-                              이전 장소에서 2.5km (4분)
-                            </ThemedText>
-                            <Pressable>
-                              <ThemedText style={styles.viewRouteText}>
-                                이동 경로 보기 &gt;
-                              </ThemedText>
-                            </Pressable>
-                          </View>
-                        )}
-                      </View>
-                    );
-                  })}
+                {/* 출발지 */}
+                <View style={s.planSection}>
+                  <View style={s.planLabelRow}>
+                    <ThemedText style={s.planLabel}>출발지</ThemedText>
+                    <ThemedText style={s.planRequired}>*</ThemedText>
+                  </View>
+                  {currentPlan.start ? (
+                    <View style={s.planFilledBox}>
+                      <ThemedText style={s.planFilledText}>{currentPlan.start.name}</ThemedText>
+                      <Pressable onPress={() => handleRemovePlace('start')}>
+                        <ThemedText style={s.planRemoveBtn}>✕</ThemedText>
+                      </Pressable>
+                    </View>
+                  ) : (
+                    <Pressable onPress={() => openSearch('start')} style={s.planEmptyBox}>
+                      <ThemedText style={s.planEmptyText}>출발지를 추가해주세요.</ThemedText>
+                    </Pressable>
+                  )}
                 </View>
-              );
-            })()}
 
-            {/* Footer Buttons */}
-            <View style={{ gap: 10, marginTop: Spacing.two }}>
-              <Pressable
-                onPress={() => {
-                  router.push('/map' as any);
-                }}
-                style={({ pressed }) => [styles.actionBtn, pressed && styles.pressed]}
-              >
-                <ThemedText style={styles.actionBtnText}>지도에서 보기</ThemedText>
-              </Pressable>
+                {/* 중간 경로 */}
+                <View style={s.planSection}>
+                  <Pressable
+                    onPress={() => openSearch('waypoint')}
+                    style={s.planLabelRow}
+                  >
+                    <ThemedText style={s.planLabel}>중간 경로</ThemedText>
+                    <ThemedText style={s.planChevron}>{'›'}</ThemedText>
+                  </Pressable>
 
-              <Pressable
-                onPress={() => setStep('list')}
-                style={({ pressed }) => [
-                  styles.actionBtn,
-                  { backgroundColor: '#E5E5EA' },
-                  pressed && styles.pressed,
-                ]}
-              >
-                <ThemedText style={[styles.actionBtnText, { color: '#000000' }]}>
-                  목록으로
-                </ThemedText>
-              </Pressable>
-            </View>
+                  {currentPlan.waypoints.map((wp, idx) => (
+                    <View key={wp.id} style={s.planFilledBox}>
+                      <ThemedText style={s.planFilledText}>{wp.name}</ThemedText>
+                      <Pressable onPress={() => handleRemoveWaypoint(idx)}>
+                        <ThemedText style={s.planRemoveBtn}>✕</ThemedText>
+                      </Pressable>
+                    </View>
+                  ))}
+
+                  {currentPlan.waypoints.length === 0 && (
+                    <Pressable onPress={() => openSearch('waypoint')} style={s.planEmptyBox}>
+                      <ThemedText style={s.planEmptyText}>중간 경로를 추가해주세요.</ThemedText>
+                    </Pressable>
+                  )}
+                </View>
+
+                {/* 도착지 */}
+                <View style={s.planSection}>
+                  <View style={s.planLabelRow}>
+                    <ThemedText style={s.planLabel}>도착지</ThemedText>
+                    <ThemedText style={s.planRequired}>*</ThemedText>
+                  </View>
+                  {currentPlan.end ? (
+                    <View style={s.planFilledBox}>
+                      <ThemedText style={s.planFilledText}>{currentPlan.end.name}</ThemedText>
+                      <Pressable onPress={() => handleRemovePlace('end')}>
+                        <ThemedText style={s.planRemoveBtn}>✕</ThemedText>
+                      </Pressable>
+                    </View>
+                  ) : (
+                    <Pressable onPress={() => openSearch('end')} style={s.planEmptyBox}>
+                      <ThemedText style={s.planEmptyText}>도착지를 추가해주세요.</ThemedText>
+                    </Pressable>
+                  )}
+                </View>
+
+                {/* 저장하기 */}
+                <Pressable
+                  style={({ pressed }) => [s.saveBtn, pressed && s.pressed]}
+                >
+                  <ThemedText style={s.saveBtnText}>저장하기</ThemedText>
+                </Pressable>
+              </View>
+            )}
           </ThemedView>
-        )}
-      </ThemedView>
-    </ScrollView>
+        </ScrollView>
+      )}
+
+      {searchModalVisible && selectedRoute && (
+        <PlaceSearchModal
+          courseType={THEME_TO_COURSE_TYPE[selectedRoute.theme || '일반'] || 'GENERAL'}
+          onSelectPlace={handleSelectPlace}
+          onClose={() => setSearchModalVisible(false)}
+        />
+      )}
+    </KeyboardAvoidingView>
   );
 }
 
-const styles = StyleSheet.create({
+const s = StyleSheet.create({
   scrollView: {
     flex: 1,
   },
@@ -301,277 +381,260 @@ const styles = StyleSheet.create({
     maxWidth: MaxContentWidth,
     flex: 1,
     paddingVertical: Spacing.four,
-    gap: Spacing.five,
   },
   stepContainer: {
     alignSelf: 'stretch',
-    gap: Spacing.four,
-    backgroundColor: 'transparent',
-  },
-  header: {
-    paddingHorizontal: Spacing.four,
-    backgroundColor: 'transparent',
-    gap: Spacing.one,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: Colors.light.titleColor,
-  },
-  subtitle: {
-    fontSize: 14,
-  },
-  list: {
     gap: Spacing.three,
-    paddingHorizontal: Spacing.four,
-  },
-  routeCard: {
-    padding: Spacing.four,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
-    gap: Spacing.two,
-  },
-  routeCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.one,
-    backgroundColor: 'transparent',
-  },
-  routeNameText: {
-    fontSize: 16,
-    fontFamily: 'EF_jejudoldam',
-    color: '#000000',
-  },
-  routeDates: {
-    fontSize: 13,
-  },
-  routeDestinations: {
-    fontSize: 12,
-    marginTop: 2,
-  },
-  routeCardActions: {
-    flexDirection: 'row',
-    gap: Spacing.two,
-    backgroundColor: 'transparent',
-    marginTop: Spacing.two,
-  },
-  cardBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cardBtnPrimary: {
-    backgroundColor: '#D36D3A',
-  },
-  cardBtnTextPrimary: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 13,
-  },
-  cardBtnSecondary: {
-    backgroundColor: '#E5E5EA',
-  },
-  cardBtnTextSecondary: {
-    color: '#000000',
-    fontSize: 13,
-  },
-  actionBtn: {
-    backgroundColor: '#D36D3A',
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginHorizontal: Spacing.four,
-  },
-  actionBtnText: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 16,
   },
   pressed: {
     opacity: 0.7,
   },
-  detailsHeaderRow: {
+
+  // ── List Screen (디자인 1번) ──
+  listHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: Spacing.four,
-    marginTop: Spacing.two,
+    marginBottom: Spacing.two,
   },
-  detailsHeaderTitle: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#92390D', // Colors.light.titleColor
-    fontFamily: 'NEXON_Lv2_Gothic',
+  listTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#222222',
   },
-  editBtn: {
-    backgroundColor: '#F4E7DF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 12,
+  mailIcon: {
+    padding: 4,
   },
-  editBtnText: {
-    color: '#92390D',
-    fontSize: 13,
-    fontWeight: 'bold',
-    fontFamily: 'NEXON_Lv2_Gothic',
+  routeList: {
+    paddingHorizontal: Spacing.four,
+    gap: 12,
   },
-  detailsSummaryCard: {
+  routeCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: Spacing.four,
-    gap: Spacing.two,
-    borderWidth: 1.5,
-    borderColor: '#92390D',
-    marginHorizontal: Spacing.four,
+    borderRadius: 14,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: '#F0F0F0',
+    gap: 6,
   },
-  detailsSummaryBadges: {
+  routeCardTop: {
     flexDirection: 'row',
-    gap: Spacing.one,
-  },
-  summaryBadgeTheme: {
-    backgroundColor: '#FAD8C2',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  summaryBadgeThemeText: {
-    color: '#D36D3A',
-    fontSize: 12,
-    fontWeight: 'bold',
-    fontFamily: 'NEXON_Lv2_Gothic',
-  },
-  summaryBadgeCompanion: {
-    backgroundColor: '#E5E5EA',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  summaryBadgeCompanionText: {
-    color: '#60646C',
-    fontSize: 12,
-    fontWeight: 'bold',
-    fontFamily: 'NEXON_Lv2_Gothic',
-  },
-  detailsSummaryTitleRow: {
-    flexDirection: 'row',
+    justifyContent: 'flex-end',
     alignItems: 'center',
     gap: 8,
-    marginTop: Spacing.one,
   },
-  avatarRow: {
-    flexDirection: 'row',
+  routeCardDate: {
+    fontSize: 12,
+    color: '#999999',
+    fontWeight: '500',
+  },
+  routeCardBadge: {
+    backgroundColor: '#E06635',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  routeCardBadgeText: {
+    fontSize: 11,
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  routeCardName: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#222222',
+  },
+  routeCardDesc: {
+    fontSize: 13,
+    color: '#999999',
+  },
+  emptyState: {
     alignItems: 'center',
+    paddingVertical: 40,
   },
-  avatarCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: '#E5E5EA',
+  emptyStateText: {
+    fontSize: 14,
+    color: '#AAAAAA',
+  },
+  createBtn: {
+    backgroundColor: '#E06635',
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#FFFFFF',
+    paddingVertical: 16,
+    borderRadius: 14,
+    marginHorizontal: Spacing.four,
+    marginTop: Spacing.two,
   },
-  avatarEmoji: {
-    fontSize: 14,
+  createBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 16,
   },
-  detailsSummaryTitleText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#92390D',
-    fontFamily: 'EF_jejudoldam',
-  },
-  detailsSummaryDateRow: {
-    alignItems: 'flex-end',
-  },
-  detailsSummaryDateText: {
-    fontSize: 13,
-    color: '#8E8E93',
-    fontFamily: 'NEXON_Lv2_Gothic',
-  },
-  tabsContainer: {
-    marginVertical: Spacing.one,
+
+  // ── Detail Screen (디자인 2번) ──
+  detailHeaderRow: {
     paddingHorizontal: Spacing.four,
   },
-  tabsScrollContent: {
+  detailTitleRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.four,
+  },
+  detailTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#222222',
+  },
+  inviteBtn: {
+    backgroundColor: '#E59341',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  inviteBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  detailSummaryCard: {
+    backgroundColor: '#F8F8F8',
+    borderRadius: 14,
+    padding: 16,
+    marginHorizontal: Spacing.four,
+    gap: 6,
+  },
+  detailSummaryTop: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 8,
+  },
+  detailSummaryDate: {
+    fontSize: 12,
+    color: '#999999',
+    fontWeight: '500',
+  },
+  detailSummaryBadge: {
+    backgroundColor: '#E06635',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+  },
+  detailSummaryBadgeText: {
+    fontSize: 11,
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  detailSummaryDesc: {
+    fontSize: 14,
+    color: '#666666',
+  },
+
+  // Day Tabs
+  dayTabsRow: {
+    paddingHorizontal: Spacing.four,
+    marginVertical: Spacing.one,
+  },
+  dayTabsContent: {
     gap: 8,
   },
   dayTab: {
-    width: 52,
-    height: 32,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 16,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#7A3B18',
-    justifyContent: 'center',
-    alignItems: 'center',
+    borderColor: '#E0E0E0',
   },
   dayTabActive: {
-    backgroundColor: '#7A3B18',
+    backgroundColor: '#E59341',
+    borderColor: '#E59341',
   },
   dayTabText: {
-    color: '#7A3B18',
     fontSize: 13,
-    fontWeight: '500',
-    fontFamily: 'NEXON_Lv2_Gothic',
+    color: '#999999',
+    fontWeight: '600',
   },
   dayTabTextActive: {
     color: '#FFFFFF',
-    fontWeight: 'bold',
+    fontWeight: '700',
   },
-  detailPlacesList: {
+
+  // Plan Sections
+  planSection: {
     paddingHorizontal: Spacing.four,
+    gap: 8,
+  },
+  planLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  planLabel: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#222222',
+  },
+  planRequired: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#E06635',
+  },
+  planChevron: {
+    fontSize: 16,
+    color: '#999999',
+    marginLeft: 2,
+  },
+  planEmptyBox: {
+    height: 48,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  planEmptyText: {
+    fontSize: 14,
+    color: '#C0C0C0',
+  },
+  planFilledBox: {
+    height: 48,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    borderWidth: 1,
+    borderColor: '#E8E8E8',
+  },
+  planFilledText: {
+    fontSize: 14,
+    color: '#222222',
+    fontWeight: '500',
+  },
+  planRemoveBtn: {
+    fontSize: 14,
+    color: '#AAAAAA',
+    padding: 4,
+  },
+
+  // Save Button
+  saveBtn: {
+    backgroundColor: '#E0E0E0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 16,
+    borderRadius: 14,
+    marginHorizontal: Spacing.four,
     marginTop: Spacing.two,
   },
-  detailPlaceBox: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 16,
-    padding: Spacing.three,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: '#E5E5EA',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 2,
-    elevation: 1,
-  },
-  detailPlaceMain: {
-    gap: 4,
-  },
-  detailPlaceName: {
+  saveBtnText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#92390D',
-    fontFamily: 'NEXON_Lv2_Gothic',
-  },
-  detailPlaceAddr: {
-    fontSize: 13,
-    color: '#8E8E93',
-    fontFamily: 'NEXON_Lv2_Gothic',
-  },
-  detailPlaceDistanceRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginTop: 10,
-    paddingTop: 8,
-    borderTopWidth: 0.5,
-    borderTopColor: '#E5E5EA',
-  },
-  detailDistanceText: {
-    fontSize: 12,
-    color: '#D36D3A',
-    fontFamily: 'NEXON_Lv2_Gothic',
-  },
-  viewRouteText: {
-    fontSize: 12,
-    color: '#D36D3A',
-    fontFamily: 'NEXON_Lv2_Gothic',
-    fontWeight: '500',
   },
 });

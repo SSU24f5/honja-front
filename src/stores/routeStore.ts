@@ -5,6 +5,7 @@ export interface RoutePlace {
   name: string;
   category: string;
   address: string;
+  image?: string;
   day?: number;
   type?: 'start' | 'waypoint' | 'end';
 }

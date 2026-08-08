@@ -11,12 +11,12 @@ export const Colors = {
   light: {
     text: '#000000',
     background: '#ffffff',
-    backgroundElement: '#F0F0F3',
+    backgroundElement: '#ffffff',
     backgroundSelected: '#E0E1E6',
     textSecondary: '#60646C',
-    brandPrimary: '#D36D3A',
-    titleColor: '#92390D',
-    hintText: '#D9D9D9',
+    brandPrimary: '#E06635',
+    titleColor: '#222222',
+    hintText: '#999999',
   },
   dark: {
     text: '#ffffff',
