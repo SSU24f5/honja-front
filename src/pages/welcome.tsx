@@ -1,11 +1,13 @@
 import { Button } from '@/components/common/button';
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing } from '@/styles/theme';
+import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function WelcomeScreen() {
   const theme = useTheme();
+  const router = useRouter();
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -16,8 +18,12 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.buttonArea}>
-          <Button label="로그인 하기" onPress={() => console.log('로그인')} variant="primary" />
-          <Button label="회원가입 하기" onPress={() => console.log('회원가입')} variant="secondary" />
+          <Button label="로그인 하기" onPress={() => router.push('/login')} variant="primary" />
+          <Button
+            label="회원가입 하기"
+            onPress={() => router.push('/signup')}
+            variant="secondary"
+          />
         </View>
       </View>
     </SafeAreaView>

@@ -1,6 +1,6 @@
+import { Colors } from '@/styles/theme';
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
-import { Colors } from '@/styles/theme';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
@@ -38,6 +38,18 @@ export default function AppTabs() {
         name="mypage"
         options={{
           title: '마이페이지',
+        }}
+      />
+      <Tabs.Screen
+        name="login"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="signup"
+        options={{
+          href: null,
         }}
       />
     </Tabs>
