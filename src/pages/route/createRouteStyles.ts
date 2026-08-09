@@ -92,14 +92,14 @@ export const styles = StyleSheet.create({
   // ── 카테고리 뱃지 ──
   categoryGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     gap: 10,
   },
   categoryBadge: {
-    flex: 1,
-    minWidth: '30%',
-    maxWidth: '31%',
-    height: 42,
+    flexGrow: 1,
+    flexShrink: 0,
+    flexBasis: 0,
+    height: 46,
+    paddingHorizontal: 4,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5F5F5',
@@ -112,12 +112,19 @@ export const styles = StyleSheet.create({
   },
   categoryBadgeText: {
     fontSize: 14,
+    lineHeight: 18,
     color: '#AAAAAA',
     fontWeight: '500',
+    textAlign: 'center',
+    includeFontPadding: false,
   },
   categoryBadgeTextActive: {
+    fontSize: 14,
+    lineHeight: 18,
     color: '#222222',
     fontWeight: '700',
+    textAlign: 'center',
+    includeFontPadding: false,
   },
 
   // ── 달력 ──
@@ -164,16 +171,16 @@ export const styles = StyleSheet.create({
   },
   calendarCellEmpty: {
     width: '14.28%',
-    height: 40,
+    height: 42,
   },
   calendarDayCell: {
     width: '14.28%',
-    height: 42,
+    height: 44,
     justifyContent: 'center',
     alignItems: 'center',
-    padding: 2,
+    padding: 3,
   },
-  // 블록 스타일 (사각형, 날마다 끊어지는 느낌)
+  // 독립된 둥근 사각형 블록 스타일
   calendarDayBlock: {
     width: '100%',
     height: '100%',
@@ -183,9 +190,11 @@ export const styles = StyleSheet.create({
   },
   calendarDayBlockActive: {
     backgroundColor: '#E06635',
+    borderRadius: 10,
   },
   calendarDayBlockInBetween: {
     backgroundColor: '#FCEFE9',
+    borderRadius: 10,
   },
   calendarDayText: {
     fontSize: 14,
@@ -453,16 +462,21 @@ export const styles = StyleSheet.create({
   categoryDropdownBtn: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#FCEFE9',
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 10,
     borderRadius: 8,
     gap: 4,
+    minWidth: 78,
+    flexShrink: 0,
   },
   categoryDropdownBtnText: {
     fontSize: 14,
+    lineHeight: 18,
     fontWeight: '700',
     color: '#E06635',
+    includeFontPadding: false,
   },
   categoryDropdownChevron: {
     fontSize: 10,

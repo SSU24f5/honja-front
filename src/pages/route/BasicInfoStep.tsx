@@ -218,6 +218,8 @@ export function BasicInfoStep({
                   style={[styles.categoryBadge, isSelected && styles.categoryBadgeActive]}
                 >
                   <ThemedText
+                    type="small"
+                    numberOfLines={1}
                     style={[
                       styles.categoryBadgeText,
                       isSelected && styles.categoryBadgeTextActive,

@@ -138,7 +138,9 @@ export function PlaceSearchModal({ courseType, onSelectPlace, onClose }: PlaceSe
             onPress={() => setShowCategoryDropdown(!showCategoryDropdown)}
             style={styles.categoryDropdownBtn}
           >
-            <ThemedText style={styles.categoryDropdownBtnText}>{selectedCategory}</ThemedText>
+            <ThemedText type="small" numberOfLines={1} style={styles.categoryDropdownBtnText}>
+              {selectedCategory}
+            </ThemedText>
             <ThemedText style={styles.categoryDropdownChevron}>{'▾'}</ThemedText>
           </Pressable>
 
