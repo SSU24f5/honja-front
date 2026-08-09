@@ -1,7 +1,7 @@
 import type { CourseType, TripCategory } from '@/api/dto/client';
 import type { RoutePlace } from '@/stores/routeStore';
 
-export type StepType = 'basic_info' | 'day_planning';
+export type { StepType, DayPlan, SearchTarget } from '@/types/route';
 
 export const THEME_CATEGORIES = ['일반', '배리어프리', '반려동물'];
 export const COMPANION_CATEGORIES = ['혼자', '가족과 함께', '친구와 함께', '애인과 함께', '그 외'];
@@ -65,15 +65,3 @@ export const PREDEFINED_PLACES: RoutePlace[] = [
   { id: 'place-cheonjeyeon', name: '천제연 폭포', category: '관광지', address: '제주 중문동 2232' },
   { id: 'place-seopjikoji', name: '섭지코지', category: '관광지', address: '제주 성산읍 고성리' },
 ];
-
-export interface DayPlan {
-  start: RoutePlace | null;
-  waypoints: RoutePlace[];
-  end: RoutePlace | null;
-}
-
-export interface SearchTarget {
-  dayIndex: number;
-  type: 'start' | 'waypoint' | 'end';
-  waypointIndex?: number;
-}

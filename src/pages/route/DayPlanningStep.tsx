@@ -61,10 +61,6 @@ export function DayPlanningStep({
                 <ThemedText style={styles.summaryBadgeCompanionText}>{selectedCompanion}</ThemedText>
               </View>
             </View>
-            {/* Optional description text line */}
-            <ThemedText style={{ fontSize: 13, color: '#333333', marginTop: 4 }}>
-              좋사좋시
-            </ThemedText>
           </View>
         </View>
 
