@@ -1,5 +1,9 @@
+import { createCourse } from '@/api/dto/client';
+import { ThemedView } from '@/components/common/themed-view';
+import { useTheme } from '@/hooks/use-theme';
+import { useRouteStore } from '@/stores/routeStore';
+import { BottomTabInset, Spacing } from '@/styles/theme';
 import { useRouter } from 'expo-router';
-import { createCourse } from '@/api/client';
 import { useMemo, useState } from 'react';
 import {
   Alert,
@@ -8,10 +12,6 @@ import {
   ScrollView,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { ThemedView } from '@/components/common/themed-view';
-import { useTheme } from '@/hooks/use-theme';
-import { useRouteStore } from '@/stores/routeStore';
-import { BottomTabInset, Spacing } from '@/styles/theme';
 import { BasicInfoStep } from './BasicInfoStep';
 import {
   COMPANION_TO_TRIP_CATEGORY,

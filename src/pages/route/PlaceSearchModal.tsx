@@ -1,13 +1,13 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, TextInput, View } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { type CourseType, type PlaceSearchItem, searchPlaces } from '@/api/client';
+import { type CourseType, type PlaceSearchItem, searchPlaces } from '@/api/dto/client';
 import LeftBackIcon from '@/assets/icon/basic/left_back.svg';
 import SearchIcon from '@/assets/icon/basic/search_glope.svg';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
 import { useTheme } from '@/hooks/use-theme';
 import type { RoutePlace } from '@/stores/routeStore';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { THEME_TO_COURSE_TYPE } from './constants';
 import { styles } from './createRouteStyles';
 

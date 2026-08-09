@@ -1,49 +1,41 @@
 import { SymbolView } from 'expo-symbols';
 import { Pressable, ScrollView, View } from 'react-native';
 import { ThemedText } from '@/components/common/themed-text';
-import type { RoutePlace } from '@/stores/routeStore';
-import type { DayPlan } from './constants';
+import { useDayPlanning } from '@/hooks/use-day-planning';
 import { styles } from './createRouteStyles';
 
 interface DayPlanningStepProps {
   routeName: string;
   routeDates: string;
-  durationText: string;
-  selectedTheme: string;
   selectedCompanion: string;
   daysList: number[];
-  selectedDayIdx: number;
-  onSelectDay: (idx: number) => void;
-  currentPlan: DayPlan;
-  onOpenSearch: (type: 'start' | 'waypoint' | 'end', waypointIndex?: number) => void;
-  onRemovePlace: (type: 'start' | 'end') => void;
-  onRemoveWaypoint: (index: number) => void;
-  onMoveWaypointUp: (index: number) => void;
-  onMoveWaypointDown: (index: number) => void;
-  isSaveEnabled: boolean;
-  onSave: () => void;
+  /** 탭에 표시할 월 숫자 (1-indexed) */
+  month: number;
   onBack: () => void;
+  onSave: () => void;
 }
 
 export function DayPlanningStep({
   routeName,
   routeDates,
-  durationText,
-  selectedTheme,
   selectedCompanion,
   daysList,
-  selectedDayIdx,
-  onSelectDay,
-  currentPlan,
-  onOpenSearch,
-  onRemovePlace,
-  onRemoveWaypoint,
-  onMoveWaypointUp,
-  onMoveWaypointDown,
-  isSaveEnabled,
-  onSave,
+  month,
   onBack,
+  onSave,
 }: DayPlanningStepProps) {
+  const {
+    selectedDayIdx,
+    currentPlan,
+    isSaveEnabled,
+    setSelectedDayIdx,
+    openSearch,
+    removePlace,
+    removeWaypoint,
+    moveWaypointUp,
+    moveWaypointDown,
+  } = useDayPlanning();
+
   return (
     <View style={styles.formPageContainer}>
       <View style={styles.formHeader}>
@@ -88,13 +80,13 @@ export function DayPlanningStep({
               return (
                 <Pressable
                   key={dayNum}
-                  onPress={() => onSelectDay(idx)}
+                  onPress={() => setSelectedDayIdx(idx)}
                   style={[styles.dayTab, isActive ? styles.dayTabActive : styles.dayTabInactive]}
                 >
                   <ThemedText
                     style={[styles.dayTabText, isActive ? styles.dayTabTextActive : styles.dayTabTextInactive]}
                   >
-                    8/{dayNum}
+                    {month}/{dayNum}
                   </ThemedText>
                 </Pressable>
               );
@@ -113,7 +105,7 @@ export function DayPlanningStep({
             {currentPlan.start ? (
               <View style={styles.placeValueBox}>
                 <Pressable
-                  onPress={() => onOpenSearch('start')}
+                  onPress={() => openSearch('start')}
                   style={{ flex: 1, justifyContent: 'center', alignSelf: 'stretch' }}
                 >
                   <ThemedText style={styles.placeValueText}>
@@ -121,7 +113,7 @@ export function DayPlanningStep({
                   </ThemedText>
                 </Pressable>
                 <Pressable
-                  onPress={() => onRemovePlace('start')}
+                  onPress={() => removePlace('start')}
                   style={styles.placeRemoveBtn}
                 >
                   <SymbolView name="xmark.circle.fill" tintColor="#8E8E93" size={18} />
@@ -129,7 +121,7 @@ export function DayPlanningStep({
               </View>
             ) : (
               <Pressable
-                onPress={() => onOpenSearch('start')}
+                onPress={() => openSearch('start')}
                 style={styles.placePlaceholderBox}
               >
                 <ThemedText style={styles.placePlaceholderText}>
@@ -146,7 +138,7 @@ export function DayPlanningStep({
             {currentPlan.waypoints.map((wp, idx) => (
               <View key={wp.id} style={styles.waypointBox}>
                 <Pressable
-                  onPress={() => onOpenSearch('waypoint', idx)}
+                  onPress={() => openSearch('waypoint', idx)}
                   style={{
                     flex: 1,
                     justifyContent: 'center',
@@ -159,7 +151,7 @@ export function DayPlanningStep({
                 <View style={styles.waypointControlsRow}>
                   {idx > 0 && (
                     <Pressable
-                      onPress={() => onMoveWaypointUp(idx)}
+                      onPress={() => moveWaypointUp(idx)}
                       style={styles.waypointControlBtn}
                     >
                       <SymbolView name="chevron.up" tintColor="#E06635" size={12} />
@@ -167,14 +159,14 @@ export function DayPlanningStep({
                   )}
                   {idx < currentPlan.waypoints.length - 1 && (
                     <Pressable
-                      onPress={() => onMoveWaypointDown(idx)}
+                      onPress={() => moveWaypointDown(idx)}
                       style={styles.waypointControlBtn}
                     >
                       <SymbolView name="chevron.down" tintColor="#E06635" size={12} />
                     </Pressable>
                   )}
                   <Pressable
-                    onPress={() => onRemoveWaypoint(idx)}
+                    onPress={() => removeWaypoint(idx)}
                     style={styles.waypointControlBtn}
                   >
                     <SymbolView name="xmark" tintColor="#8E8E93" size={12} />
@@ -187,13 +179,13 @@ export function DayPlanningStep({
             ))}
 
             {currentPlan.waypoints.length === 0 ? (
-              <Pressable onPress={() => onOpenSearch('waypoint')} style={styles.placePlaceholderBox}>
+              <Pressable onPress={() => openSearch('waypoint')} style={styles.placePlaceholderBox}>
                 <ThemedText style={styles.placePlaceholderText}>
                   중간 경로를 추가해주세요.
                 </ThemedText>
               </Pressable>
             ) : (
-              <Pressable onPress={() => onOpenSearch('waypoint')} style={styles.plusCardBox}>
+              <Pressable onPress={() => openSearch('waypoint')} style={styles.plusCardBox}>
                 <SymbolView name="plus" tintColor="#E06635" size={16} />
               </Pressable>
             )}
@@ -208,7 +200,7 @@ export function DayPlanningStep({
             {currentPlan.end ? (
               <View style={styles.placeValueBox}>
                 <Pressable
-                  onPress={() => onOpenSearch('end')}
+                  onPress={() => openSearch('end')}
                   style={{ flex: 1, justifyContent: 'center', alignSelf: 'stretch' }}
                 >
                   <ThemedText style={styles.placeValueText}>
@@ -216,7 +208,7 @@ export function DayPlanningStep({
                   </ThemedText>
                 </Pressable>
                 <Pressable
-                  onPress={() => onRemovePlace('end')}
+                  onPress={() => removePlace('end')}
                   style={styles.placeRemoveBtn}
                 >
                   <SymbolView name="xmark.circle.fill" tintColor="#8E8E93" size={18} />
@@ -224,7 +216,7 @@ export function DayPlanningStep({
               </View>
             ) : (
               <Pressable
-                onPress={() => onOpenSearch('end')}
+                onPress={() => openSearch('end')}
                 style={styles.placePlaceholderBox}
               >
                 <ThemedText style={styles.placePlaceholderText}>

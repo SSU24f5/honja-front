@@ -13,11 +13,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import LeftBackIcon from '@/assets/icon/basic/left_back.svg';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
+import { useDayPlanning } from '@/hooks/use-day-planning';
 import { useTheme } from '@/hooks/use-theme';
-import { type RoutePlace, type SavedRoute, useRouteStore } from '@/stores/routeStore';
+import { type SavedRoute, useRouteStore } from '@/stores/routeStore';
 import { BottomTabInset, MaxContentWidth, Spacing } from '@/styles/theme';
 import { PlaceSearchModal } from './PlaceSearchModal';
-import { type DayPlan, type SearchTarget, THEME_TO_COURSE_TYPE } from './constants';
+import { THEME_TO_COURSE_TYPE } from './constants';
 
 type StepType = 'list' | 'details';
 
@@ -28,31 +29,37 @@ export default function RouteScreen() {
 
   const { savedRoutes } = useRouteStore();
 
+  const {
+    searchModalVisible,
+    selectedDayIdx,
+    currentPlan,
+    setSelectedRouteId: setStoreRouteId,
+    setSelectedDayIdx,
+    openSearch,
+    closeSearch,
+    selectPlace,
+    removePlace,
+    removeWaypoint,
+  } = useDayPlanning();
+
   const [step, setStep] = useState<StepType>('list');
   const [selectedRouteId, setSelectedRouteId] = useState<string | null>(null);
-  const [selectedDayIdx, setSelectedDayIdx] = useState(0);
-
-  // Day planning state for detail view
-  const [dayPlans, setDayPlans] = useState<Record<number, DayPlan>>({});
-  const [searchModalVisible, setSearchModalVisible] = useState(false);
-  const [searchTarget, setSearchTarget] = useState<SearchTarget | null>(null);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Reset selected tab on route change
   useEffect(() => {
-    setSelectedDayIdx(0);
-    setDayPlans({});
+    setStoreRouteId(selectedRouteId);
   }, [selectedRouteId]);
 
   // Handle back press in search modal
   useEffect(() => {
     if (!searchModalVisible) return;
     const backAction = () => {
-      setSearchModalVisible(false);
+      closeSearch();
       return true;
     };
     const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
     return () => backHandler.remove();
-  }, [searchModalVisible]);
+  }, [searchModalVisible, closeSearch]);
 
   const insets = {
     ...safeAreaInsets,
@@ -93,59 +100,6 @@ export default function RouteScreen() {
       return { daysList: [10, 11, 12, 13, 14], month: 7 };
     }
   }, [selectedRoute]);
-
-  const currentPlan = useMemo(() => {
-    return dayPlans[selectedDayIdx] || { start: null, waypoints: [], end: null };
-  }, [dayPlans, selectedDayIdx]);
-
-  const openSearch = (type: 'start' | 'waypoint' | 'end', waypointIndex?: number) => {
-    setSearchTarget({ dayIndex: selectedDayIdx, type, waypointIndex });
-    setSearchModalVisible(true);
-  };
-
-  const handleSelectPlace = (place: RoutePlace) => {
-    if (!searchTarget) return;
-    const { dayIndex, type, waypointIndex } = searchTarget;
-
-    setDayPlans((prev) => {
-      const existing = prev[dayIndex] || { start: null, waypoints: [], end: null };
-      if (type === 'start') {
-        return { ...prev, [dayIndex]: { ...existing, start: place } };
-      } else if (type === 'end') {
-        return { ...prev, [dayIndex]: { ...existing, end: place } };
-      } else {
-        if (typeof waypointIndex === 'number') {
-          const updatedWaypoints = [...existing.waypoints];
-          updatedWaypoints[waypointIndex] = place;
-          return { ...prev, [dayIndex]: { ...existing, waypoints: updatedWaypoints } };
-        } else {
-          if (existing.waypoints.some((wp) => wp.id === place.id)) return prev;
-          return { ...prev, [dayIndex]: { ...existing, waypoints: [...existing.waypoints, place] } };
-        }
-      }
-    });
-
-    setSearchModalVisible(false);
-    setSearchTarget(null);
-  };
-
-  const handleRemovePlace = (type: 'start' | 'end') => {
-    setDayPlans((prev) => {
-      const existing = prev[selectedDayIdx] || { start: null, waypoints: [], end: null };
-      if (type === 'start') return { ...prev, [selectedDayIdx]: { ...existing, start: null } };
-      if (type === 'end') return { ...prev, [selectedDayIdx]: { ...existing, end: null } };
-      return prev;
-    });
-  };
-
-  const handleRemoveWaypoint = (index: number) => {
-    setDayPlans((prev) => {
-      const existing = prev[selectedDayIdx] || { start: null, waypoints: [], end: null };
-      const updatedWaypoints = [...existing.waypoints];
-      updatedWaypoints.splice(index, 1);
-      return { ...prev, [selectedDayIdx]: { ...existing, waypoints: updatedWaypoints } };
-    });
-  };
 
   return (
     <KeyboardAvoidingView
@@ -289,7 +243,7 @@ export default function RouteScreen() {
                   {currentPlan.start ? (
                     <View style={s.planFilledBox}>
                       <ThemedText style={s.planFilledText}>{currentPlan.start.name}</ThemedText>
-                      <Pressable onPress={() => handleRemovePlace('start')}>
+                      <Pressable onPress={() => removePlace('start')}>
                         <ThemedText style={s.planRemoveBtn}>✕</ThemedText>
                       </Pressable>
                     </View>
@@ -313,7 +267,7 @@ export default function RouteScreen() {
                   {currentPlan.waypoints.map((wp, idx) => (
                     <View key={wp.id} style={s.planFilledBox}>
                       <ThemedText style={s.planFilledText}>{wp.name}</ThemedText>
-                      <Pressable onPress={() => handleRemoveWaypoint(idx)}>
+                      <Pressable onPress={() => removeWaypoint(idx)}>
                         <ThemedText style={s.planRemoveBtn}>✕</ThemedText>
                       </Pressable>
                     </View>
@@ -335,7 +289,7 @@ export default function RouteScreen() {
                   {currentPlan.end ? (
                     <View style={s.planFilledBox}>
                       <ThemedText style={s.planFilledText}>{currentPlan.end.name}</ThemedText>
-                      <Pressable onPress={() => handleRemovePlace('end')}>
+                      <Pressable onPress={() => removePlace('end')}>
                         <ThemedText style={s.planRemoveBtn}>✕</ThemedText>
                       </Pressable>
                     </View>
@@ -361,8 +315,8 @@ export default function RouteScreen() {
       {searchModalVisible && selectedRoute && (
         <PlaceSearchModal
           courseType={THEME_TO_COURSE_TYPE[selectedRoute.theme || '일반'] || 'GENERAL'}
-          onSelectPlace={handleSelectPlace}
-          onClose={() => setSearchModalVisible(false)}
+          onSelectPlace={selectPlace}
+          onClose={closeSearch}
         />
       )}
     </KeyboardAvoidingView>

@@ -7,6 +7,9 @@ import { styles } from './createRouteStyles';
 
 const DAY_OF_WEEK_KR = ['일', '월', '화', '수', '목', '금', '토'] as const;
 
+/** 캘린더 그리드는 월요일 시작 → 월·화·수·목·금·토·일 순서 */
+const CALENDAR_WEEKDAYS = [...DAY_OF_WEEK_KR.slice(1), DAY_OF_WEEK_KR[0]] as const;
+
 interface BasicInfoStepProps {
   routeName: string;
   onRouteNameChange: (text: string) => void;
@@ -143,7 +146,7 @@ export function BasicInfoStep({
               </View>
 
               <View style={styles.weekdaysRow}>
-                {['월', '화', '수', '목', '금', '토', '일'].map((day) => (
+                {CALENDAR_WEEKDAYS.map((day) => (
                   <ThemedText key={day} style={styles.weekdayText}>
                     {day}
                   </ThemedText>

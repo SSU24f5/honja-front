@@ -1,4 +1,4 @@
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
 
 export type CourseType = 'BARRIER_FREE' | 'PET' | 'GENERAL';
 export type TripCategory = 'ALONE' | 'FAMILY' | 'FRIEND' | 'LOVER' | 'ETC';

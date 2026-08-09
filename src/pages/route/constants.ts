@@ -1,4 +1,4 @@
-import type { CourseType, TripCategory } from '@/api/client';
+import type { CourseType, TripCategory } from '@/api/dto/client';
 import type { RoutePlace } from '@/stores/routeStore';
 
 export type StepType = 'basic_info' | 'day_planning';
