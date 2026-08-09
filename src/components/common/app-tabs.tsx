@@ -40,6 +40,12 @@ export default function AppTabs() {
           title: '마이페이지',
         }}
       />
+      <Tabs.Screen
+        name="test"
+        options={{
+          title: '테스트',
+        }}
+      />
     </Tabs>
   );
 }

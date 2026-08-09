@@ -31,6 +31,9 @@ export default function AppTabs() {
           <TabTrigger name="mypage" href="/mypage" asChild>
             <TabButton>마이페이지</TabButton>
           </TabTrigger>
+          <TabTrigger name="test" href="/test" asChild>
+            <TabButton>테스트</TabButton>
+          </TabTrigger>
         </CustomTabList>
       </TabList>
     </Tabs>

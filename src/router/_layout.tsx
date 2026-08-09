@@ -1,5 +1,5 @@
-import { useFonts } from 'expo-font';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useColorScheme } from 'react-native';
 import { AnimatedSplashOverlay } from '@/components/common/animated-icon';
@@ -20,9 +20,17 @@ export default function TabLayout() {
     return null;
   }
 
+  const MyDefaultTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      background: '#ffffff',
+    },
+  };
+
   return (
     <QueryProvider>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : MyDefaultTheme}>
         <AnimatedSplashOverlay />
         <AppTabs />
       </ThemeProvider>
