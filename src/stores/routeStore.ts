@@ -49,6 +49,7 @@ interface RouteState {
     companion?: string,
   ) => void;
   deleteRoute: (id: string) => void;
+  updateRouteItinerary: (id: string, itinerary: RoutePlace[]) => void;
 }
 
 export const useRouteStore = create<RouteState>((set) => ({
@@ -211,5 +212,11 @@ export const useRouteStore = create<RouteState>((set) => ({
   deleteRoute: (id) =>
     set((state) => ({
       savedRoutes: state.savedRoutes.filter((r) => r.id !== id),
+    })),
+  updateRouteItinerary: (id, itinerary) =>
+    set((state) => ({
+      savedRoutes: state.savedRoutes.map((r) =>
+        r.id === id ? { ...r, itinerary } : r,
+      ),
     })),
 }));

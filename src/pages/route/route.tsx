@@ -1,6 +1,13 @@
+import { ThemedText } from '@/components/common/themed-text';
+import { ThemedView } from '@/components/common/themed-view';
+import { useDayPlanning } from '@/hooks/use-day-planning';
+import { useTheme } from '@/hooks/use-theme';
+import { type RoutePlace, useRouteStore } from '@/stores/routeStore';
+import { BottomTabInset, MaxContentWidth, Spacing } from '@/styles/theme';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useState } from 'react';
 import {
+  Alert,
   BackHandler,
   KeyboardAvoidingView,
   Platform,
@@ -10,13 +17,7 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import LeftBackIcon from '@/assets/icon/basic/left_back.svg';
-import { ThemedText } from '@/components/common/themed-text';
-import { ThemedView } from '@/components/common/themed-view';
-import { useDayPlanning } from '@/hooks/use-day-planning';
-import { useTheme } from '@/hooks/use-theme';
-import { type SavedRoute, useRouteStore } from '@/stores/routeStore';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/styles/theme';
+import { DayPlanningStep } from './DayPlanningStep';
 import { PlaceSearchModal } from './PlaceSearchModal';
 import { THEME_TO_COURSE_TYPE } from './constants';
 
@@ -27,19 +28,14 @@ export default function RouteScreen() {
   const theme = useTheme();
   const router = useRouter();
 
-  const { savedRoutes } = useRouteStore();
+  const { savedRoutes, updateRouteItinerary, deleteRoute } = useRouteStore();
 
   const {
     searchModalVisible,
-    selectedDayIdx,
-    currentPlan,
+    dayPlans,
     setSelectedRouteId: setStoreRouteId,
-    setSelectedDayIdx,
-    openSearch,
     closeSearch,
     selectPlace,
-    removePlace,
-    removeWaypoint,
   } = useDayPlanning();
 
   const [step, setStep] = useState<StepType>('list');
@@ -101,6 +97,54 @@ export default function RouteScreen() {
     }
   }, [selectedRoute]);
 
+  const handleSaveRoute = () => {
+    if (!selectedRouteId) return;
+
+    const newItinerary: RoutePlace[] = [];
+    Object.entries(dayPlans).forEach(([dayIdxStr, plan]) => {
+      const day = parseInt(dayIdxStr, 10);
+      if (plan.start) {
+        newItinerary.push({ ...plan.start, day, type: 'start' });
+      }
+      plan.waypoints.forEach((wp) => {
+        newItinerary.push({ ...wp, day, type: 'waypoint' });
+      });
+      if (plan.end) {
+        newItinerary.push({ ...plan.end, day, type: 'end' });
+      }
+    });
+
+    updateRouteItinerary(selectedRouteId, newItinerary);
+
+    if (Platform.OS === 'web') {
+      window.alert('여행 일정이 저장되었습니다.');
+    } else {
+      Alert.alert('성공', '여행 일정이 저장되었습니다.');
+    }
+    setStep('list');
+  };
+
+  const handleDeleteRoute = (id: string, name: string) => {
+    const doDelete = () => {
+      deleteRoute(id);
+      if (selectedRouteId === id) {
+        setSelectedRouteId(null);
+        setStep('list');
+      }
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm(`'${name}' 여행을 삭제하시겠습니까?`)) {
+        doDelete();
+      }
+    } else {
+      Alert.alert('여행 삭제', `'${name}' 여행을 삭제하시겠습니까?`, [
+        { text: '취소', style: 'cancel' },
+        { text: '삭제', style: 'destructive', onPress: doDelete },
+      ]);
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -136,13 +180,24 @@ export default function RouteScreen() {
                       style={({ pressed }) => [s.routeCard, pressed && s.pressed]}
                     >
                       <View style={s.routeCardTop}>
-                        <ThemedText style={s.routeCardDate}>
-                          {route.dates.replace(/\./g, '/')}
-                        </ThemedText>
-                        <View style={s.routeCardBadge}>
-                          <ThemedText style={s.routeCardBadgeText}>
-                            {route.theme || '일반'}
+                        <Pressable
+                          onPress={(e) => {
+                            e.stopPropagation();
+                            handleDeleteRoute(route.id, route.name);
+                          }}
+                          hitSlop={8}
+                        >
+                          <ThemedText style={s.deleteBtnText}>삭제</ThemedText>
+                        </Pressable>
+                        <View style={s.routeCardRightHeader}>
+                          <ThemedText style={s.routeCardDate}>
+                            {route.dates.replace(/\./g, '/')}
                           </ThemedText>
+                          <View style={s.routeCardBadge}>
+                            <ThemedText style={s.routeCardBadgeText}>
+                              {route.theme || '일반'}
+                            </ThemedText>
+                          </View>
                         </View>
                       </View>
                       <ThemedText style={s.routeCardName}>{route.name}</ThemedText>
@@ -173,140 +228,18 @@ export default function RouteScreen() {
               </View>
             )}
 
-            {/* ── STEP 2: 상세보기 (디자인 2번) ── */}
+            {/* ── STEP 2: 상세보기 ── */}
             {step === 'details' && selectedRoute && (
-              <View style={s.stepContainer}>
-                {/* Back Arrow */}
-                <View style={s.detailHeaderRow}>
-                  <Pressable onPress={() => setStep('list')} hitSlop={12}>
-                    <LeftBackIcon width={11} height={17} />
-                  </Pressable>
-                </View>
-
-                {/* Route Title + 초대하기 */}
-                <View style={s.detailTitleRow}>
-                  <ThemedText style={s.detailTitle}>{selectedRoute.name}</ThemedText>
-                  <Pressable style={s.inviteBtn}>
-                    <ThemedText style={s.inviteBtnText}>초대하기</ThemedText>
-                  </Pressable>
-                </View>
-
-                {/* Summary Card */}
-                <View style={s.detailSummaryCard}>
-                  <View style={s.detailSummaryTop}>
-                    <ThemedText style={s.detailSummaryDate}>
-                      {selectedRoute.dates.replace(/\./g, '/')}
-                    </ThemedText>
-                    <View style={s.detailSummaryBadge}>
-                      <ThemedText style={s.detailSummaryBadgeText}>
-                        {selectedRoute.theme || '일반'}
-                      </ThemedText>
-                    </View>
-                  </View>
-                  <ThemedText style={s.detailSummaryDesc}>
-                    {selectedRoute.companion || '혼자'}
-                  </ThemedText>
-                </View>
-
-                {/* Day Tabs */}
-                <View style={s.dayTabsRow}>
-                  <ScrollView
-                    horizontal
-                    showsHorizontalScrollIndicator={false}
-                    contentContainerStyle={s.dayTabsContent}
-                  >
-                    {daysList.map((dayNum, idx) => {
-                      const isActive = selectedDayIdx === idx;
-                      return (
-                        <Pressable
-                          key={dayNum}
-                          onPress={() => setSelectedDayIdx(idx)}
-                          style={[s.dayTab, isActive && s.dayTabActive]}
-                        >
-                          <ThemedText
-                            style={[s.dayTabText, isActive && s.dayTabTextActive]}
-                          >
-                            {month}/{dayNum}
-                          </ThemedText>
-                        </Pressable>
-                      );
-                    })}
-                  </ScrollView>
-                </View>
-
-                {/* 출발지 */}
-                <View style={s.planSection}>
-                  <View style={s.planLabelRow}>
-                    <ThemedText style={s.planLabel}>출발지</ThemedText>
-                    <ThemedText style={s.planRequired}>*</ThemedText>
-                  </View>
-                  {currentPlan.start ? (
-                    <View style={s.planFilledBox}>
-                      <ThemedText style={s.planFilledText}>{currentPlan.start.name}</ThemedText>
-                      <Pressable onPress={() => removePlace('start')}>
-                        <ThemedText style={s.planRemoveBtn}>✕</ThemedText>
-                      </Pressable>
-                    </View>
-                  ) : (
-                    <Pressable onPress={() => openSearch('start')} style={s.planEmptyBox}>
-                      <ThemedText style={s.planEmptyText}>출발지를 추가해주세요.</ThemedText>
-                    </Pressable>
-                  )}
-                </View>
-
-                {/* 중간 경로 */}
-                <View style={s.planSection}>
-                  <Pressable
-                    onPress={() => openSearch('waypoint')}
-                    style={s.planLabelRow}
-                  >
-                    <ThemedText style={s.planLabel}>중간 경로</ThemedText>
-                    <ThemedText style={s.planChevron}>{'›'}</ThemedText>
-                  </Pressable>
-
-                  {currentPlan.waypoints.map((wp, idx) => (
-                    <View key={wp.id} style={s.planFilledBox}>
-                      <ThemedText style={s.planFilledText}>{wp.name}</ThemedText>
-                      <Pressable onPress={() => removeWaypoint(idx)}>
-                        <ThemedText style={s.planRemoveBtn}>✕</ThemedText>
-                      </Pressable>
-                    </View>
-                  ))}
-
-                  {currentPlan.waypoints.length === 0 && (
-                    <Pressable onPress={() => openSearch('waypoint')} style={s.planEmptyBox}>
-                      <ThemedText style={s.planEmptyText}>중간 경로를 추가해주세요.</ThemedText>
-                    </Pressable>
-                  )}
-                </View>
-
-                {/* 도착지 */}
-                <View style={s.planSection}>
-                  <View style={s.planLabelRow}>
-                    <ThemedText style={s.planLabel}>도착지</ThemedText>
-                    <ThemedText style={s.planRequired}>*</ThemedText>
-                  </View>
-                  {currentPlan.end ? (
-                    <View style={s.planFilledBox}>
-                      <ThemedText style={s.planFilledText}>{currentPlan.end.name}</ThemedText>
-                      <Pressable onPress={() => removePlace('end')}>
-                        <ThemedText style={s.planRemoveBtn}>✕</ThemedText>
-                      </Pressable>
-                    </View>
-                  ) : (
-                    <Pressable onPress={() => openSearch('end')} style={s.planEmptyBox}>
-                      <ThemedText style={s.planEmptyText}>도착지를 추가해주세요.</ThemedText>
-                    </Pressable>
-                  )}
-                </View>
-
-                {/* 저장하기 */}
-                <Pressable
-                  style={({ pressed }) => [s.saveBtn, pressed && s.pressed]}
-                >
-                  <ThemedText style={s.saveBtnText}>저장하기</ThemedText>
-                </Pressable>
-              </View>
+              <DayPlanningStep
+                title="여행 상세"
+                routeName={selectedRoute.name}
+                routeDates={selectedRoute.dates}
+                selectedCompanion={selectedRoute.companion || selectedRoute.tags?.[1] || '혼자'}
+                daysList={daysList}
+                month={month}
+                onBack={() => setStep('list')}
+                onSave={handleSaveRoute}
+              />
             )}
           </ThemedView>
         </ScrollView>
@@ -374,9 +307,19 @@ const s = StyleSheet.create({
   },
   routeCardTop: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
     gap: 8,
+  },
+  routeCardRightHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  deleteBtnText: {
+    fontSize: 12,
+    color: '#FF3B30',
+    fontWeight: '600',
   },
   routeCardDate: {
     fontSize: 12,

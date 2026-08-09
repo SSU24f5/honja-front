@@ -1,3 +1,4 @@
+import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, SafeAreaView, StyleSheet, View } from 'react-native';
 import { TabTrigger, type TabTriggerSlotProps } from 'expo-router/ui';
@@ -45,6 +46,8 @@ export function MyTripsScreen() {
 
   const trips = savedRoutes.map(toTripCardData);
 
+  const router = useRouter();
+
   const handleConfirmDelete = () => {
     if (!targetTrip) return;
     deleteRoute(targetTrip.id);
@@ -52,7 +55,7 @@ export function MyTripsScreen() {
   };
 
   const handleCreateTrip = () => {
-    // TODO: 여행 생성 화면으로 이동 (라우팅은 추후 연결)
+    router.push('/route/create' as any);
   };
 
   return (
