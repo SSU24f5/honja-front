@@ -15,8 +15,6 @@ import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 export default function AppTabs() {
-  // 떠있는 상단 탭바(CustomTabList)의 실제 렌더링 높이를 측정해서
-  // TabSlot(화면 내용)이 그만큼 아래로 밀리게 함 -> 화면마다 padding 값을 추측할 필요 없음
   const [tabBarHeight, setTabBarHeight] = useState(0);
 
   return (
