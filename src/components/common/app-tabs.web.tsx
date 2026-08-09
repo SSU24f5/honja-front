@@ -1,15 +1,15 @@
-import { useState } from 'react';
+import { Colors, MaxContentWidth, Spacing } from '@/styles/theme';
 import {
   TabList,
-  type TabListProps,
-  TabSlot,
   Tabs,
+  TabSlot,
   TabTrigger,
+  type TabListProps,
   type TabTriggerSlotProps,
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
 import { Pressable, StyleSheet, useColorScheme, View, type LayoutChangeEvent } from 'react-native';
-import { Colors, MaxContentWidth, Spacing } from '@/styles/theme';
 import { ExternalLink } from './external-link';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';

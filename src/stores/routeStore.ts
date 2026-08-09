@@ -6,6 +6,9 @@ export interface RoutePlace {
   name: string;
   category: string;
   address: string;
+  image?: string;
+  day?: number;
+  type?: 'start' | 'waypoint' | 'end';
 }
 
 export interface SavedRoute {
@@ -24,6 +27,8 @@ export interface SavedRoute {
    */
   avatars?: ImageSourcePropType[];
   itinerary: RoutePlace[];
+  theme?: string;
+  companion?: string;
 }
 
 interface RouteState {
@@ -35,7 +40,14 @@ interface RouteState {
   movePlaceUp: (index: number) => void;
   movePlaceDown: (index: number) => void;
   clearItinerary: () => void;
-  createRoute: (name: string, dates: string, duration: string) => void;
+  setItinerary: (itinerary: RoutePlace[]) => void;
+  createRoute: (
+    name: string,
+    dates: string,
+    duration: string,
+    theme?: string,
+    companion?: string,
+  ) => void;
   deleteRoute: (id: string) => void;
 }
 
@@ -67,19 +79,48 @@ export const useRouteStore = create<RouteState>((set) => ({
       dates: '26.07.10. ~ 26.07.14.',
       duration: '4박 5일',
       tags: ['일반', '혼자'],
+      theme: '일반',
+      companion: '혼자',
       itinerary: [
-        { id: 'route-p1', name: '제주국제공항', category: '교통', address: '제주 공항로 2' },
         {
-          id: 'route-p2',
-          name: '함덕 해수욕장',
-          category: '관광지',
-          address: '제주 조천읍 함덕리',
+          id: 'route-p-start',
+          name: '어쩌구 호텔',
+          category: '숙소',
+          address: '제주특별자치도 제주시 어쩌구동 123',
+          day: 0,
+          type: 'start',
         },
         {
-          id: 'route-p3',
-          name: '에코랜드 테마파크',
+          id: 'route-p-wp1',
+          name: '김녕 해수욕장',
           category: '관광지',
-          address: '제주 번영로 1278-169',
+          address: '제주특별자치도 제주시 구좌읍 김녕리',
+          day: 0,
+          type: 'waypoint',
+        },
+        {
+          id: 'route-p-wp2',
+          name: '아베베 베이커리',
+          category: '음식점',
+          address: '제주특별자치도 제주시 동문로6길 4',
+          day: 0,
+          type: 'waypoint',
+        },
+        {
+          id: 'route-p-wp3',
+          name: '으브브 베이커리',
+          category: '음식점',
+          address: '제주특별자치도 제주시 동문로6길 5',
+          day: 0,
+          type: 'waypoint',
+        },
+        {
+          id: 'route-p-end',
+          name: '맛있는 고기국수',
+          category: '음식점',
+          address: '제주특별자치도 제주시 국수길 1',
+          day: 0,
+          type: 'end',
         },
       ],
     },
@@ -146,7 +187,11 @@ export const useRouteStore = create<RouteState>((set) => ({
     set({
       itinerary: [],
     }),
-  createRoute: (name, dates, duration) =>
+  setItinerary: (itinerary) =>
+    set({
+      itinerary,
+    }),
+  createRoute: (name, dates, duration, theme, companion) =>
     set((state) => {
       const newRoute: SavedRoute = {
         id: `route-${Date.now()}`,
@@ -155,6 +200,8 @@ export const useRouteStore = create<RouteState>((set) => ({
         duration,
         tags: ['일반'],
         itinerary: [...state.itinerary],
+        theme,
+        companion,
       };
       return {
         savedRoutes: [...state.savedRoutes, newRoute],
