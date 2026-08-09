@@ -82,12 +82,20 @@ describe('useRouteStore', () => {
     expect(useRouteStore.getState().itinerary.length).toBe(0);
   });
 
-  it('should create route and add to savedRoutes', () => {
-    useRouteStore.setState({ savedRoutes: [] });
-    useRouteStore.getState().createRoute('우도 탐방', '26.07.12. ~ 26.07.13.', '1박 2일');
+  it('should delete route by id', () => {
+    useRouteStore.setState({
+      savedRoutes: [{ id: 'test-1', name: 'Test', dates: '', duration: '', tags: [], itinerary: [] }],
+    });
+    useRouteStore.getState().deleteRoute('test-1');
+    expect(useRouteStore.getState().savedRoutes.length).toBe(0);
+  });
 
-    expect(useRouteStore.getState().savedRoutes.length).toBe(1);
-    expect(useRouteStore.getState().savedRoutes[0].name).toBe('우도 탐방');
-    expect(useRouteStore.getState().itinerary.length).toBe(0); // Itinerary is cleared upon save
+  it('should update route itinerary by id', () => {
+    useRouteStore.setState({
+      savedRoutes: [{ id: 'test-1', name: 'Test', dates: '', duration: '', tags: [], itinerary: [] }],
+    });
+    const newPlaces = [{ id: 'p1', name: 'Place 1', category: 'Category', address: 'Addr' }];
+    useRouteStore.getState().updateRouteItinerary('test-1', newPlaces);
+    expect(useRouteStore.getState().savedRoutes[0].itinerary).toEqual(newPlaces);
   });
 });

@@ -1,24 +1,31 @@
+import { Colors, MaxContentWidth, Spacing } from '@/styles/theme';
 import {
   TabList,
-  type TabListProps,
-  TabSlot,
   Tabs,
+  TabSlot,
   TabTrigger,
+  type TabListProps,
   type TabTriggerSlotProps,
 } from 'expo-router/ui';
 import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, useColorScheme, View } from 'react-native';
-import { Colors, MaxContentWidth, Spacing } from '@/styles/theme';
+import { useState } from 'react';
+import { Pressable, StyleSheet, useColorScheme, View, type LayoutChangeEvent } from 'react-native';
 import { ExternalLink } from './external-link';
 import { ThemedText } from './themed-text';
 import { ThemedView } from './themed-view';
 
 export default function AppTabs() {
+  const [tabBarHeight, setTabBarHeight] = useState(0);
+
   return (
     <Tabs>
-      <TabSlot style={{ height: '100%' }} />
+      <TabSlot style={{ height: '100%', paddingTop: tabBarHeight }} />
       <TabList asChild>
-        <CustomTabList>
+        <CustomTabList
+          onLayout={(event: LayoutChangeEvent) => {
+            setTabBarHeight(event.nativeEvent.layout.height);
+          }}
+        >
           <TabTrigger name="home" href="/" asChild>
             <TabButton>홈</TabButton>
           </TabTrigger>
@@ -31,9 +38,8 @@ export default function AppTabs() {
           <TabTrigger name="mypage" href="/mypage" asChild>
             <TabButton>마이페이지</TabButton>
           </TabTrigger>
-          <TabTrigger name="test" href="/test" asChild>
-            <TabButton>테스트</TabButton>
-          </TabTrigger>
+          {/* 하단 탭바엔 안 보이지만, TabList 안에 있어야 실제로 라우트로 등록됨 */}
+          <TabTrigger name="invitation" href="/invitation" style={{ display: 'none' }} />
         </CustomTabList>
       </TabList>
     </Tabs>
@@ -55,12 +61,16 @@ export function TabButton({ children, isFocused, ...props }: TabTriggerSlotProps
   );
 }
 
-export function CustomTabList(props: TabListProps) {
+interface CustomTabListProps extends TabListProps {
+  onLayout?: (event: LayoutChangeEvent) => void;
+}
+
+export function CustomTabList({ onLayout, ...props }: CustomTabListProps) {
   const scheme = useColorScheme();
   const colors = Colors[scheme === 'dark' ? 'dark' : 'light'];
 
   return (
-    <View {...props} style={styles.tabListContainer}>
+    <View {...props} onLayout={onLayout} style={styles.tabListContainer}>
       <ThemedView type="backgroundElement" style={styles.innerContainer}>
         <ThemedText type="smallBold" style={styles.brandText}>
           Expo Starter

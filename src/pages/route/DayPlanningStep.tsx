@@ -5,6 +5,7 @@ import { useDayPlanning } from '@/hooks/use-day-planning';
 import { styles } from './createRouteStyles';
 
 interface DayPlanningStepProps {
+  title?: string;
   routeName: string;
   routeDates: string;
   selectedCompanion: string;
@@ -16,6 +17,7 @@ interface DayPlanningStepProps {
 }
 
 export function DayPlanningStep({
+  title,
   routeName,
   routeDates,
   selectedCompanion,
@@ -39,7 +41,7 @@ export function DayPlanningStep({
   return (
     <View style={styles.formPageContainer}>
       <View style={styles.formHeader}>
-        <ThemedText style={styles.formTitle}>여행 생성하기</ThemedText>
+        <ThemedText style={styles.formTitle}>{title ?? '여행 생성하기'}</ThemedText>
       </View>
 
       <View style={styles.formBody}>

@@ -1,3 +1,4 @@
+import type { ImageSourcePropType } from 'react-native';
 import { create } from 'zustand';
 
 export interface RoutePlace {
@@ -15,6 +16,16 @@ export interface SavedRoute {
   name: string;
   dates: string;
   duration: string;
+  /** 예: ['일반', '혼자'] / ['일반', '친구와 함께'] / ['일반', '가족과 함께'] */
+  tags: string[];
+  /** '셋이왓수다' 카드처럼 부제 문구가 있는 경우 */
+  description?: string;
+  /**
+   * 참여자 아바타 이미지.
+   * - 로컬 에셋: require('@/assets/avatars/xxx.png')
+   * - 원격 이미지(임시 목업): { uri: 'https://...' }
+   */
+  avatars?: ImageSourcePropType[];
   itinerary: RoutePlace[];
   theme?: string;
   companion?: string;
@@ -37,6 +48,8 @@ interface RouteState {
     theme?: string,
     companion?: string,
   ) => void;
+  deleteRoute: (id: string) => void;
+  updateRouteItinerary: (id: string, itinerary: RoutePlace[]) => void;
 }
 
 export const useRouteStore = create<RouteState>((set) => ({
@@ -66,6 +79,7 @@ export const useRouteStore = create<RouteState>((set) => ({
       name: '혼자왓수다',
       dates: '26.07.10. ~ 26.07.14.',
       duration: '4박 5일',
+      tags: ['일반', '혼자'],
       theme: '일반',
       companion: '혼자',
       itinerary: [
@@ -110,6 +124,30 @@ export const useRouteStore = create<RouteState>((set) => ({
           type: 'end',
         },
       ],
+    },
+    {
+      id: 'route-2',
+      name: '셋이왓수다',
+      dates: '26.07.10. ~ 26.07.14.',
+      duration: '4박 5일',
+      tags: ['일반', '친구와 함께'],
+      description: '제주도에 혼자왓수다 올해도 혼자 왓수다 내년에는 둘이 왓수다',
+      // TODO: require('@/assets/avatars/xxx.png')로 교체
+      avatars: [
+        { uri: 'https://i.pravatar.cc/100?img=1' },
+        { uri: 'https://i.pravatar.cc/100?img=2' },
+      ],
+      itinerary: [],
+    },
+    {
+      id: 'route-3',
+      name: '둘이왓수다',
+      dates: '26.07.10. ~ 26.07.14.',
+      duration: '4박 5일',
+      tags: ['일반', '가족과 함께'],
+      // TODO: require('@/assets/avatars/xxx.png')로 교체
+      avatars: [{ uri: 'https://i.pravatar.cc/100?img=3' }],
+      itinerary: [],
     },
   ],
   addPlaceToRoute: (place) =>
@@ -161,6 +199,7 @@ export const useRouteStore = create<RouteState>((set) => ({
         name,
         dates,
         duration,
+        tags: ['일반'],
         itinerary: [...state.itinerary],
         theme,
         companion,
@@ -170,4 +209,14 @@ export const useRouteStore = create<RouteState>((set) => ({
         itinerary: [],
       };
     }),
+  deleteRoute: (id) =>
+    set((state) => ({
+      savedRoutes: state.savedRoutes.filter((r) => r.id !== id),
+    })),
+  updateRouteItinerary: (id, itinerary) =>
+    set((state) => ({
+      savedRoutes: state.savedRoutes.map((r) =>
+        r.id === id ? { ...r, itinerary } : r,
+      ),
+    })),
 }));
