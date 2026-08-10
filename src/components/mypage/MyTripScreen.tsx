@@ -1,0 +1,142 @@
+import { useState } from 'react';
+import { FlatList, Pressable, SafeAreaView, StyleSheet, View } from 'react-native';
+import { TabTrigger } from 'expo-router/ui';
+import { AppIcon } from '@/components/common/AppIcon';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { ThemedText } from '@/components/common/themed-text';
+import { ThemedView } from '@/components/common/themed-view';
+import { useTheme } from '@/hooks/use-theme';
+import { Spacing } from '@/styles/theme';
+import { useRouteStore, type SavedRoute } from '@/stores/routeStore';
+import { TripCard, type TripCardData } from '@/components/route/TripCard';
+import { DeleteConfirmModal } from '@/components/route/DeleteConfirmModal';
+
+// store의 SavedRoute -> 카드가 원하는 형태로 변환
+function toTripCardData(route: SavedRoute): TripCardData {
+  return {
+    id: route.id,
+    tags: route.tags,
+    title: route.name,
+    description: route.description,
+    dateRangeText: `${route.dates} (${route.duration})`,
+    avatars: route.avatars,
+  };
+}
+
+export function MyTripsScreen() {
+  const savedRoutes = useRouteStore((state) => state.savedRoutes);
+  const deleteRoute = useRouteStore((state) => state.deleteRoute);
+  const [targetTrip, setTargetTrip] = useState<TripCardData | null>(null);
+  const theme = useTheme();
+
+  const trips = savedRoutes.map(toTripCardData);
+
+  const handleConfirmDelete = () => {
+    if (!targetTrip) return;
+    deleteRoute(targetTrip.id);
+    setTargetTrip(null);
+  };
+
+  const handleCreateTrip = () => {
+    // TODO: 여행 생성 화면으로 이동 (라우팅은 추후 연결)
+  };
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <ThemedView type="backgroundElement" style={styles.container}>
+        <SafeAreaView style={styles.safeArea}>
+          <View style={styles.header}>
+            <ThemedText type="subtitle" style={styles.headerTitle}>
+              내 여행
+            </ThemedText>
+            <TabTrigger name="invitation" href="/invitation" asChild>
+              <Pressable>
+                <ThemedView style={styles.iconButton}>
+                  <AppIcon name="envelope" size={20} color={theme.text} />
+                </ThemedView>
+              </Pressable>
+            </TabTrigger>
+          </View>
+
+          <FlatList
+            data={trips}
+            keyExtractor={(item) => item.id}
+            renderItem={({ item }) => (
+              <TripCard trip={item} onRequestDelete={setTargetTrip} />
+            )}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          />
+
+          <View style={styles.bottomArea}>
+            <Pressable
+              style={[styles.createButton, { backgroundColor: theme.brandPrimary }]}
+              onPress={handleCreateTrip}
+            >
+              <ThemedText type="default" themeColor="background" style={styles.createButtonText}>
+                여행 생성하기
+              </ThemedText>
+            </Pressable>
+          </View>
+
+          <DeleteConfirmModal
+            visible={targetTrip !== null}
+            onCancel={() => setTargetTrip(null)}
+            onConfirm={handleConfirmDelete}
+          />
+        </SafeAreaView>
+      </ThemedView>
+    </GestureHandlerRootView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+  safeArea: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.two,
+    paddingBottom: Spacing.three,
+  },
+  headerTitle: {
+    fontSize: 22,
+    lineHeight: 28,
+  },
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
+  },
+  listContent: {
+    paddingTop: Spacing.half,
+    paddingBottom: Spacing.four,
+  },
+  bottomArea: {
+    paddingHorizontal: Spacing.three,
+    paddingBottom: Spacing.three,
+    paddingTop: Spacing.one,
+  },
+  createButton: {
+    borderRadius: 28,
+    paddingVertical: Spacing.three,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  createButtonText: {
+    fontWeight: '700',
+  },
+});

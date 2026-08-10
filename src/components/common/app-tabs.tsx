@@ -41,6 +41,7 @@ export default function AppTabs() {
         }}
       />
       <Tabs.Screen
+<<<<<<< HEAD
         name="login"
         options={{
           href: null,
@@ -50,6 +51,11 @@ export default function AppTabs() {
         name="signup"
         options={{
           href: null,
+=======
+        name="test"
+        options={{
+          title: '테스트',
+>>>>>>> origin/develop
         }}
       />
     </Tabs>
