@@ -1,6 +1,6 @@
+import { Colors } from '@/styles/theme';
 import { Tabs } from 'expo-router';
 import { useColorScheme } from 'react-native';
-import { Colors } from '@/styles/theme';
 
 export default function AppTabs() {
   const scheme = useColorScheme();
@@ -41,9 +41,21 @@ export default function AppTabs() {
         }}
       />
       <Tabs.Screen
+<<<<<<< HEAD
+        name="login"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="signup"
+        options={{
+          href: null,
+=======
         name="test"
         options={{
           title: '테스트',
+>>>>>>> origin/develop
         }}
       />
     </Tabs>
