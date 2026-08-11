@@ -25,10 +25,15 @@ interface PlaceSearchModalProps {
 function toRoutePlace(item: PlaceSearchItem): RoutePlace {
   return {
     id: item.contentid,
+    contentId: item.contentid,
+    contentTypeId: item.contenttypeid,
     name: item.title,
+    title: item.title,
     category: item.contenttypeid,
     address: item.addr1 + (item.addr2 ? ` ${item.addr2}` : ''),
     image: item.firstimage || item.firstimage2 || undefined,
+    mapx: item.mapx,
+    mapy: item.mapy,
   };
 }
 

@@ -748,7 +748,7 @@ export const styles = StyleSheet.create({
   },
   recommendSubmitBtn: {
     height: 48,
-    backgroundColor: '#DF7B38',
+    backgroundColor: '#E06635',
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
@@ -758,5 +758,192 @@ export const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: '700',
     color: '#FFFFFF',
+  },
+
+  // ── 대개편된 DayPlanningStep 전용 스타일 ──
+  screenHeaderTitle: {
+    fontSize: 24,
+    fontWeight: '800',
+    color: '#111111',
+    marginTop: 2,
+    marginBottom: 4,
+  },
+  summaryCardNew: {
+    backgroundColor: '#F6F7F9',
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 12,
+    gap: 10,
+  },
+  summaryCardTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: 8,
+  },
+  summaryBadgesContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  summaryBadgeDateNew: {
+    backgroundColor: '#EBECEF',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  summaryBadgeDateTextNew: {
+    color: '#7E8085',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  summaryBadgeThemeNew: {
+    backgroundColor: '#95B36F',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 6,
+  },
+  summaryBadgeThemeTextNew: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  moreOptionsBtn: {
+    paddingHorizontal: 4,
+    paddingVertical: 2,
+    marginLeft: 2,
+  },
+  moreOptionsText: {
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#222222',
+    letterSpacing: 1,
+  },
+  summaryCardContent: {
+    paddingVertical: 2,
+  },
+  summaryDescriptionText: {
+    fontSize: 14,
+    fontWeight: '400',
+    color: '#222222',
+    lineHeight: 20,
+  },
+  summaryCardDivider: {
+    height: 1,
+    backgroundColor: '#ECECEC',
+    marginTop: 2,
+  },
+  tabsContainerNew: {
+    marginVertical: 4,
+  },
+  tabsScrollContentNew: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  dayTabNew: {
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dayTabActiveNew: {
+    backgroundColor: '#E2953B',
+  },
+  dayTabInactiveNew: {
+    backgroundColor: '#F7F7F9',
+  },
+  dayTabTextNew: {
+    fontSize: 15,
+  },
+  dayTabTextActiveNew: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  dayTabTextInactiveNew: {
+    color: '#E2953B',
+    fontWeight: '600',
+  },
+  dailyPlannerSectionNew: {
+    gap: 16,
+  },
+  plannerItemNew: {
+    gap: 8,
+  },
+  plannerLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  plannerLabelNew: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#111111',
+  },
+  requiredAsteriskNew: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#E06635',
+  },
+  floatingBadgeGreen: {
+    position: 'absolute',
+    top: -12,
+    alignSelf: 'center',
+    zIndex: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#58A766',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  floatingBadgeGreenText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  placePlaceholderBoxNew: {
+    height: 54,
+    backgroundColor: '#F6F7F9',
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    justifyContent: 'center',
+    borderWidth: 0,
+  },
+  placePlaceholderTextNew: {
+    fontSize: 15,
+    color: '#C0C0C5',
+    fontWeight: '400',
+  },
+  placeValueBoxNew: {
+    height: 54,
+    backgroundColor: '#F6F7F9',
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  placeValueTextNew: {
+    fontSize: 15,
+    color: '#222222',
+    fontWeight: '600',
+  },
+  waypointBoxNew: {
+    height: 54,
+    backgroundColor: '#F6F7F9',
+    borderRadius: 16,
+    paddingHorizontal: 18,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 6,
+  },
+  plusCardBoxNew: {
+    height: 48,
+    backgroundColor: '#F6F7F9',
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

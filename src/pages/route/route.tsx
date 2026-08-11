@@ -63,13 +63,14 @@ function formatDateFormatted(dateStr?: string): string {
   const parts = dateStr.split('~');
   if (parts.length === 2) {
     const formatPart = (p: string) => {
-      const cleaned = p.trim().replace(/\.$/, '').replace(/\./g, '/');
+      const cleaned = p.trim().replace(/\.$/, '').replace(/\./g, '/').replace(/-/g, '/');
       const tokens = cleaned.split('/');
       if (tokens.length === 3) {
-        return `${tokens[1]}/${tokens[2]}`;
+        const year = tokens[0].length === 4 ? tokens[0].slice(2) : tokens[0];
+        return `${year.padStart(2, '0')}/${tokens[1].padStart(2, '0')}/${tokens[2].padStart(2, '0')}`;
       }
       if (tokens.length === 2) {
-        return `${tokens[0]}/${tokens[1]}`;
+        return `${tokens[0].padStart(2, '0')}/${tokens[1].padStart(2, '0')}`;
       }
       return cleaned;
     };
@@ -635,7 +636,11 @@ export default function RouteScreen() {
                 {/* 여행 생성하기 버튼 */}
                 <Pressable
                   onPress={() => router.push('/route/create' as any)}
-                  style={({ pressed }) => [s.createBtn, pressed && s.pressed]}
+                  style={({ pressed }) => [
+                    s.createBtn,
+                    { backgroundColor: theme.brandPrimary },
+                    pressed && s.pressed,
+                  ]}
                 >
                   <ThemedText style={s.createBtnText}>여행 생성하기</ThemedText>
                 </Pressable>
@@ -648,7 +653,8 @@ export default function RouteScreen() {
                 title="여행 상세"
                 routeName={selectedRoute.name}
                 routeDates={formatDateFormatted(selectedRoute.dates)}
-                selectedCompanion={selectedRoute.companion || selectedRoute.tags?.[1] || '혼자'}
+                selectedTheme={selectedRoute.theme || '일반'}
+                routeDescription={selectedRoute.description}
                 daysList={daysList}
                 month={month}
                 onBack={() => setStep('list')}
@@ -673,10 +679,15 @@ export default function RouteScreen() {
         onAddRecommendedPlaces={(recommendedPlaces) => {
           const newPlaces: RoutePlace[] = recommendedPlaces.map((rec) => ({
             id: rec.contentid || String(Date.now() + Math.random()),
+            contentId: rec.contentid,
+            contentTypeId: rec.contenttypeid,
             name: rec.title,
+            title: rec.title,
             category: '추천',
             address: rec.addr1 || rec.addr2 || '추천 장소',
             image: rec.firstimage || rec.firstimage2,
+            mapx: rec.mapx,
+            mapy: rec.mapy,
           }));
           useDayPlanningStore.getState().addRecommendedWaypoints(newPlaces);
         }}
