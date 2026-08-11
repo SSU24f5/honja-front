@@ -1,7 +1,7 @@
-import { useTheme } from '@/hooks/use-theme';
-import { Spacing } from '@/styles/theme';
 import type { StyleProp, ViewStyle } from 'react-native';
 import { Pressable, StyleSheet, Text } from 'react-native';
+import { useTheme } from '@/hooks/use-theme';
+import { Spacing } from '@/styles/theme';
 
 type ButtonVariant = 'primary' | 'secondary';
 

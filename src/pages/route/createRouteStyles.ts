@@ -571,4 +571,192 @@ export const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '700',
   },
+
+  // ── WaypointManagementScreen (Screen 2: 여행_중간 경로) ──
+  waypointPageContainer: {
+    flex: 1,
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.two,
+    paddingBottom: Spacing.four,
+    backgroundColor: '#FFFFFF',
+  },
+  waypointHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  waypointBackBtn: {
+    paddingVertical: 8,
+    paddingRight: 16,
+  },
+  waypointTitleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+    gap: 6,
+  },
+  waypointMainTitle: {
+    fontSize: 20,
+    color: '#222222',
+  },
+  waypointTitleBold: {
+    fontWeight: '800',
+    fontSize: 20,
+    color: '#222222',
+    includeFontPadding: false,
+  },
+  waypointTitleDot: {
+    color: '#666666',
+    fontSize: 16,
+    includeFontPadding: false,
+  },
+  waypointTitleSub: {
+    fontWeight: '500',
+    fontSize: 15,
+    color: '#555555',
+    includeFontPadding: false,
+  },
+  waypointListContent: {
+    gap: 12,
+    paddingBottom: 24,
+  },
+  waypointRowContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  waypointRowDragging: {
+    opacity: 0.6,
+    transform: [{ scale: 1.02 }],
+  },
+  waypointCardItem: {
+    flex: 1,
+    height: 52,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 14,
+    paddingHorizontal: 18,
+    justifyContent: 'center',
+  },
+  waypointCardText: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#222222',
+  },
+  waypointDragHandleBtn: {
+    paddingVertical: 12,
+    paddingHorizontal: 6,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  waypointAddBox: {
+    height: 52,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 14,
+    paddingHorizontal: 18,
+    justifyContent: 'center',
+  },
+  waypointAddText: {
+    fontSize: 14,
+    color: '#AAAAAA',
+  },
+  waypointFooterRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 'auto',
+    paddingTop: 16,
+  },
+  routeRecommendBtn: {
+    flex: 1,
+    height: 50,
+    backgroundColor: '#E59341',
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeRecommendBtn: {
+    flex: 1,
+    height: 50,
+    backgroundColor: '#DF7B38',
+    borderRadius: 14,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  bottomBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+
+  // ── PlaceRecommendationModal (Screen 1: 여행_장소 추천 받기) ──
+  recommendModalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.45)',
+    paddingHorizontal: 24,
+  },
+  recommendModalBackdrop: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  recommendModalContent: {
+    width: '100%',
+    maxWidth: 340,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    padding: 24,
+    gap: 16,
+  },
+  recommendHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  recommendModalTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#111111',
+  },
+  recommendRefreshBtn: {
+    padding: 4,
+  },
+  recommendModalSubtitle: {
+    fontSize: 13,
+    color: '#666666',
+    lineHeight: 18,
+  },
+  recommendOptionList: {
+    gap: 10,
+    marginVertical: 4,
+  },
+  recommendOptionItem: {
+    height: 48,
+    backgroundColor: '#F8F9FA',
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  recommendOptionName: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#222222',
+  },
+  recommendSubmitBtn: {
+    height: 48,
+    backgroundColor: '#DF7B38',
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 4,
+  },
+  recommendSubmitBtnText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
 });

@@ -1,9 +1,9 @@
+import { useEffect, useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { getTerms, type Term } from '@/api/auth';
 import { TermsModal } from '@/components/auth/TermsModal';
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing } from '@/styles/theme';
-import { useEffect, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 interface TermsAgreementProps {
   // 동의한 약관 id 배열 + 필수 다 됐는지를 부모에게 전달

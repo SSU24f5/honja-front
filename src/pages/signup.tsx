@@ -47,7 +47,7 @@ export default function SignupScreen() {
     setLoading(true);
     try {
       await signUp({ email, authCode: code, nickname, password, agreedTermIds });
-      router.replace('/login'); // 가입 성공 → 로그인 화면으로
+      router.replace('/login' as any); // 가입 성공 → 로그인 화면으로
     } catch (e) {
       setError(e instanceof Error ? e.message : '회원가입에 실패했습니다.');
     } finally {

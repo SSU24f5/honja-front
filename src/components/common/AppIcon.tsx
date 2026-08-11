@@ -1,7 +1,7 @@
+import { Ionicons } from '@expo/vector-icons';
+import { SymbolView } from 'expo-symbols';
 import type { ComponentProps } from 'react';
 import { Platform, Text } from 'react-native';
-import { SymbolView } from 'expo-symbols';
-import { Ionicons } from '@expo/vector-icons';
 
 // 여기서 쓰는 아이콘 종류만 우선 등록. 필요하면 추가하면 됨.
 export type AppIconName = 'envelope' | 'trash' | 'exchange';

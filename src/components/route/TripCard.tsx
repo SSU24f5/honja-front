@@ -1,7 +1,7 @@
 import { useRef } from 'react';
-import { Animated, Pressable, StyleSheet, View, type ImageSourcePropType } from 'react-native';
-import { AppIcon } from '@/components/common/AppIcon';
+import { Animated, type ImageSourcePropType, Pressable, StyleSheet, View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
+import { AppIcon } from '@/components/common/AppIcon';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
 import { useTheme } from '@/hooks/use-theme';
@@ -31,7 +31,7 @@ export function TripCard({ trip, onRequestDelete }: TripCardProps) {
 
   const renderRightActions = (
     _progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>
+    dragX: Animated.AnimatedInterpolation<number>,
   ) => {
     const scale = dragX.interpolate({
       inputRange: [-100, 0],

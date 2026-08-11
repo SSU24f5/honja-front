@@ -1,9 +1,4 @@
-import {
-    Image,
-    type ImageSourcePropType,
-    StyleSheet,
-    View,
-} from "react-native";
+import { Image, type ImageSourcePropType, StyleSheet, View } from 'react-native';
 
 interface AvatarStackProps {
   /**
@@ -16,7 +11,7 @@ interface AvatarStackProps {
 }
 
 // 이미지 로드 전/실패 시 배경으로 보일 색 (원 자체는 이미지가 채움)
-const AVATAR_FALLBACK_COLORS = ["#F4D9B8", "#D9C7EE", "#C9E4DE", "#F7C9C9"];
+const AVATAR_FALLBACK_COLORS = ['#F4D9B8', '#D9C7EE', '#C9E4DE', '#F7C9C9'];
 
 export function AvatarStack({ avatars, size = 28 }: AvatarStackProps) {
   if (!avatars || avatars.length === 0) return null;
@@ -26,7 +21,7 @@ export function AvatarStack({ avatars, size = 28 }: AvatarStackProps) {
       {avatars.map((avatar, index) => (
         <View
           key={
-            typeof avatar === "object" && avatar !== null && "uri" in avatar
+            typeof avatar === 'object' && avatar !== null && 'uri' in avatar
               ? (avatar as any).uri
               : `avatar-fallback-${index}`
           }
@@ -36,8 +31,7 @@ export function AvatarStack({ avatars, size = 28 }: AvatarStackProps) {
               width: size,
               height: size,
               borderRadius: size / 2,
-              backgroundColor:
-                AVATAR_FALLBACK_COLORS[index % AVATAR_FALLBACK_COLORS.length],
+              backgroundColor: AVATAR_FALLBACK_COLORS[index % AVATAR_FALLBACK_COLORS.length],
               marginLeft: index === 0 ? 0 : -size * 0.35,
               zIndex: avatars.length - index,
             },
@@ -56,15 +50,15 @@ export function AvatarStack({ avatars, size = 28 }: AvatarStackProps) {
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginRight: 6,
   },
   circle: {
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 2,
-    borderColor: "#FFFFFF",
-    overflow: "hidden",
+    borderColor: '#FFFFFF',
+    overflow: 'hidden',
   },
 });

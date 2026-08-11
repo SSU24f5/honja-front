@@ -1,7 +1,7 @@
 import { useRef } from 'react';
 import { Animated, type ImageSourcePropType, Pressable, StyleSheet, View } from 'react-native';
-import { AppIcon } from '@/components/common/AppIcon';
 import { Swipeable } from 'react-native-gesture-handler';
+import { AppIcon } from '@/components/common/AppIcon';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
 import { Spacing } from '@/styles/theme';
@@ -23,13 +23,17 @@ interface InvitationCardProps {
   onRequestReject: (invitation: InvitationCardData) => void;
 }
 
-export function InvitationCard({ invitation, onRequestAccept, onRequestReject }: InvitationCardProps) {
+export function InvitationCard({
+  invitation,
+  onRequestAccept,
+  onRequestReject,
+}: InvitationCardProps) {
   const swipeableRef = useRef<Swipeable>(null);
 
   // 왼쪽으로 스와이프 -> 오른쪽에 수락(그린) 버튼 노출
   const renderRightActions = (
     _progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>
+    dragX: Animated.AnimatedInterpolation<number>,
   ) => {
     const scale = dragX.interpolate({
       inputRange: [-100, 0],
@@ -39,7 +43,11 @@ export function InvitationCard({ invitation, onRequestAccept, onRequestReject }:
 
     return (
       <Pressable
-        style={[styles.actionButton, styles.rightActionButton, { backgroundColor: TripColors.success }]}
+        style={[
+          styles.actionButton,
+          styles.rightActionButton,
+          { backgroundColor: TripColors.success },
+        ]}
         onPress={() => {
           swipeableRef.current?.close();
           onRequestAccept(invitation);
@@ -55,7 +63,7 @@ export function InvitationCard({ invitation, onRequestAccept, onRequestReject }:
   // 오른쪽으로 스와이프 -> 왼쪽에 거부(트래시) 버튼 노출
   const renderLeftActions = (
     _progress: Animated.AnimatedInterpolation<number>,
-    dragX: Animated.AnimatedInterpolation<number>
+    dragX: Animated.AnimatedInterpolation<number>,
   ) => {
     const scale = dragX.interpolate({
       inputRange: [0, 100],
@@ -65,7 +73,11 @@ export function InvitationCard({ invitation, onRequestAccept, onRequestReject }:
 
     return (
       <Pressable
-        style={[styles.actionButton, styles.leftActionButton, { backgroundColor: TripColors.danger }]}
+        style={[
+          styles.actionButton,
+          styles.leftActionButton,
+          { backgroundColor: TripColors.danger },
+        ]}
         onPress={() => {
           swipeableRef.current?.close();
           onRequestReject(invitation);

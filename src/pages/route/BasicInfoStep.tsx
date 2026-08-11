@@ -220,10 +220,7 @@ export function BasicInfoStep({
                   <ThemedText
                     type="small"
                     numberOfLines={1}
-                    style={[
-                      styles.categoryBadgeText,
-                      isSelected && styles.categoryBadgeTextActive,
-                    ]}
+                    style={[styles.categoryBadgeText, isSelected && styles.categoryBadgeTextActive]}
                   >
                     {cat}
                   </ThemedText>

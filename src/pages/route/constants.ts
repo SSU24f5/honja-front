@@ -1,19 +1,19 @@
 import type { CourseType, TripCategory } from '@/api/dto/client';
 import type { RoutePlace } from '@/stores/routeStore';
 
-export type { StepType, DayPlan, SearchTarget } from '@/types/route';
+export type { DayPlan, SearchTarget, StepType } from '@/types/route';
 
 export const THEME_CATEGORIES = ['일반', '배리어프리', '반려동물'];
 export const COMPANION_CATEGORIES = ['혼자', '가족과 함께', '친구와 함께', '애인과 함께', '그 외'];
 
 export const THEME_TO_COURSE_TYPE: Record<string, CourseType> = {
-  '일반': 'GENERAL',
-  '배리어프리': 'BARRIER_FREE',
-  '반려동물': 'PET',
+  일반: 'GENERAL',
+  배리어프리: 'BARRIER_FREE',
+  반려동물: 'PET',
 };
 
 export const COMPANION_TO_TRIP_CATEGORY: Record<string, TripCategory> = {
-  '혼자': 'ALONE',
+  혼자: 'ALONE',
   '가족과 함께': 'FAMILY',
   '친구와 함께': 'FRIEND',
   '애인과 함께': 'LOVER',

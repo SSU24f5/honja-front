@@ -1,5 +1,7 @@
 import { SymbolView } from 'expo-symbols';
 import { Pressable, ScrollView, View } from 'react-native';
+import LeftBackIcon from '@/assets/icon/basic/left_back.svg';
+import RightArrowIcon from '@/assets/icon/basic/right_arrow.svg';
 import { ThemedText } from '@/components/common/themed-text';
 import { useDayPlanning } from '@/hooks/use-day-planning';
 import { styles } from './createRouteStyles';
@@ -14,6 +16,7 @@ interface DayPlanningStepProps {
   month: number;
   onBack: () => void;
   onSave: () => void;
+  onOpenWaypoints?: () => void;
 }
 
 export function DayPlanningStep({
@@ -25,6 +28,7 @@ export function DayPlanningStep({
   month,
   onBack,
   onSave,
+  onOpenWaypoints,
 }: DayPlanningStepProps) {
   const {
     selectedDayIdx,
@@ -40,14 +44,18 @@ export function DayPlanningStep({
 
   return (
     <View style={styles.formPageContainer}>
-      <View style={styles.formHeader}>
-        <ThemedText style={styles.formTitle}>{title ?? '여행 생성하기'}</ThemedText>
+      <View style={styles.formHeaderRow}>
+        <Pressable onPress={onBack} hitSlop={10} style={{ paddingVertical: 8 }}>
+          <LeftBackIcon width={12} height={18} />
+        </Pressable>
       </View>
 
       <View style={styles.formBody}>
         {/* Summary Card */}
         <View style={styles.summaryCard}>
-          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+          <View
+            style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}
+          >
             <ThemedText style={styles.summaryTitleText}>{routeName || '혼자왔어유'}</ThemedText>
             <Pressable style={styles.inviteBtn}>
               <ThemedText style={styles.inviteBtnText}>초대하기</ThemedText>
@@ -60,7 +68,9 @@ export function DayPlanningStep({
                 <ThemedText style={styles.summaryBadgeDateText}>{routeDates}</ThemedText>
               </View>
               <View style={styles.summaryBadgeCompanion}>
-                <ThemedText style={styles.summaryBadgeCompanionText}>{selectedCompanion}</ThemedText>
+                <ThemedText style={styles.summaryBadgeCompanionText}>
+                  {selectedCompanion}
+                </ThemedText>
               </View>
             </View>
           </View>
@@ -82,7 +92,10 @@ export function DayPlanningStep({
                   style={[styles.dayTab, isActive ? styles.dayTabActive : styles.dayTabInactive]}
                 >
                   <ThemedText
-                    style={[styles.dayTabText, isActive ? styles.dayTabTextActive : styles.dayTabTextInactive]}
+                    style={[
+                      styles.dayTabText,
+                      isActive ? styles.dayTabTextActive : styles.dayTabTextInactive,
+                    ]}
                   >
                     {month}/{dayNum}
                   </ThemedText>
@@ -106,32 +119,31 @@ export function DayPlanningStep({
                   onPress={() => openSearch('start')}
                   style={{ flex: 1, justifyContent: 'center', alignSelf: 'stretch' }}
                 >
-                  <ThemedText style={styles.placeValueText}>
-                    {currentPlan.start.name}
-                  </ThemedText>
+                  <ThemedText style={styles.placeValueText}>{currentPlan.start.name}</ThemedText>
                 </Pressable>
-                <Pressable
-                  onPress={() => removePlace('start')}
-                  style={styles.placeRemoveBtn}
-                >
+                <Pressable onPress={() => removePlace('start')} style={styles.placeRemoveBtn}>
                   <SymbolView name="xmark.circle.fill" tintColor="#8E8E93" size={18} />
                 </Pressable>
               </View>
             ) : (
-              <Pressable
-                onPress={() => openSearch('start')}
-                style={styles.placePlaceholderBox}
-              >
-                <ThemedText style={styles.placePlaceholderText}>
-                  출발지를 추가해주세요.
-                </ThemedText>
+              <Pressable onPress={() => openSearch('start')} style={styles.placePlaceholderBox}>
+                <ThemedText style={styles.placePlaceholderText}>출발지를 추가해주세요.</ThemedText>
               </Pressable>
             )}
           </View>
 
           {/* Waypoints */}
           <View style={styles.plannerItem}>
-            <ThemedText style={styles.plannerLabel}>중간 경로</ThemedText>
+            <Pressable
+              onPress={onOpenWaypoints}
+              style={({ pressed }) => [
+                { flexDirection: 'row', alignItems: 'center', gap: 6, marginVertical: 4 },
+                pressed && styles.pressed,
+              ]}
+            >
+              <ThemedText style={styles.plannerLabel}>중간 경로</ThemedText>
+              <RightArrowIcon width={7} height={13} fill="#292929" />
+            </Pressable>
 
             {currentPlan.waypoints.map((wp, idx) => (
               <View key={wp.id} style={styles.waypointBox}>
@@ -145,39 +157,14 @@ export function DayPlanningStep({
                 >
                   <ThemedText style={styles.placeValueText}>{wp.name}</ThemedText>
                 </Pressable>
-
-                <View style={styles.waypointControlsRow}>
-                  {idx > 0 && (
-                    <Pressable
-                      onPress={() => moveWaypointUp(idx)}
-                      style={styles.waypointControlBtn}
-                    >
-                      <SymbolView name="chevron.up" tintColor="#E06635" size={12} />
-                    </Pressable>
-                  )}
-                  {idx < currentPlan.waypoints.length - 1 && (
-                    <Pressable
-                      onPress={() => moveWaypointDown(idx)}
-                      style={styles.waypointControlBtn}
-                    >
-                      <SymbolView name="chevron.down" tintColor="#E06635" size={12} />
-                    </Pressable>
-                  )}
-                  <Pressable
-                    onPress={() => removeWaypoint(idx)}
-                    style={styles.waypointControlBtn}
-                  >
-                    <SymbolView name="xmark" tintColor="#8E8E93" size={12} />
-                  </Pressable>
-                  <View style={styles.waypointDragHandle}>
-                    <SymbolView name="line.3.horizontal" tintColor="#C7C7CC" size={16} />
-                  </View>
-                </View>
               </View>
             ))}
 
             {currentPlan.waypoints.length === 0 ? (
-              <Pressable onPress={() => openSearch('waypoint')} style={styles.placePlaceholderBox}>
+              <Pressable
+                onPress={onOpenWaypoints || (() => openSearch('waypoint'))}
+                style={styles.placePlaceholderBox}
+              >
                 <ThemedText style={styles.placePlaceholderText}>
                   중간 경로를 추가해주세요.
                 </ThemedText>
@@ -201,25 +188,15 @@ export function DayPlanningStep({
                   onPress={() => openSearch('end')}
                   style={{ flex: 1, justifyContent: 'center', alignSelf: 'stretch' }}
                 >
-                  <ThemedText style={styles.placeValueText}>
-                    {currentPlan.end.name}
-                  </ThemedText>
+                  <ThemedText style={styles.placeValueText}>{currentPlan.end.name}</ThemedText>
                 </Pressable>
-                <Pressable
-                  onPress={() => removePlace('end')}
-                  style={styles.placeRemoveBtn}
-                >
+                <Pressable onPress={() => removePlace('end')} style={styles.placeRemoveBtn}>
                   <SymbolView name="xmark.circle.fill" tintColor="#8E8E93" size={18} />
                 </Pressable>
               </View>
             ) : (
-              <Pressable
-                onPress={() => openSearch('end')}
-                style={styles.placePlaceholderBox}
-              >
-                <ThemedText style={styles.placePlaceholderText}>
-                  도착지를 추가해주세요.
-                </ThemedText>
+              <Pressable onPress={() => openSearch('end')} style={styles.placePlaceholderBox}>
+                <ThemedText style={styles.placePlaceholderText}>도착지를 추가해주세요.</ThemedText>
               </Pressable>
             )}
           </View>
