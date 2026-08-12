@@ -30,7 +30,11 @@ export function SentInvitationCard({ invitation }: SentInvitationCardProps) {
 
       <View style={styles.titleRow}>
         <AvatarStack avatars={invitation.avatars ?? []} />
-        <ThemedText type="subtitle" style={[styles.title, { color: TripColors.titleText }]} numberOfLines={1}>
+        <ThemedText
+          type="subtitle"
+          style={[styles.title, { color: TripColors.titleText }]}
+          numberOfLines={1}
+        >
           {invitation.title}
         </ThemedText>
       </View>

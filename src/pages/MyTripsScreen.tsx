@@ -1,17 +1,17 @@
 import { useRouter } from 'expo-router';
+import { TabTrigger, type TabTriggerSlotProps } from 'expo-router/ui';
 import { useState } from 'react';
 import { FlatList, Pressable, SafeAreaView, StyleSheet, View } from 'react-native';
-import { TabTrigger, type TabTriggerSlotProps } from 'expo-router/ui';
-import { AppIcon } from '@/components/common/AppIcon';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AppIcon } from '@/components/common/AppIcon';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
+import { DeleteConfirmModal } from '@/components/route/DeleteConfirmModal';
+import { TripCard, type TripCardData } from '@/components/route/TripCard';
 import { useTheme } from '@/hooks/use-theme';
+import { type SavedRoute, useRouteStore } from '@/stores/routeStore';
 import { Spacing } from '@/styles/theme';
 import { TripColors } from '@/styles/tripColors';
-import { useRouteStore, type SavedRoute } from '@/stores/routeStore';
-import { TripCard, type TripCardData } from '@/components/route/TripCard';
-import { DeleteConfirmModal } from '@/components/route/DeleteConfirmModal';
 
 // store의 SavedRoute -> 카드가 원하는 형태로 변환
 function toTripCardData(route: SavedRoute): TripCardData {
@@ -60,10 +60,16 @@ export function MyTripsScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemedView type="backgroundElement" style={[styles.container, { backgroundColor: TripColors.screenBackground }]}>
+      <ThemedView
+        type="backgroundElement"
+        style={[styles.container, { backgroundColor: TripColors.screenBackground }]}
+      >
         <SafeAreaView style={styles.safeArea}>
           <View style={styles.header}>
-            <ThemedText type="subtitle" style={[styles.headerTitle, { color: TripColors.titleText }]}>
+            <ThemedText
+              type="subtitle"
+              style={[styles.headerTitle, { color: TripColors.titleText }]}
+            >
               내 여행
             </ThemedText>
             <TabTrigger name="invitation" asChild>
@@ -74,9 +80,7 @@ export function MyTripsScreen() {
           <FlatList
             data={trips}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TripCard trip={item} onRequestDelete={setTargetTrip} />
-            )}
+            renderItem={({ item }) => <TripCard trip={item} onRequestDelete={setTargetTrip} />}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
           />

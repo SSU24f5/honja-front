@@ -84,7 +84,9 @@ describe('useRouteStore', () => {
 
   it('should delete route by id', () => {
     useRouteStore.setState({
-      savedRoutes: [{ id: 'test-1', name: 'Test', dates: '', duration: '', tags: [], itinerary: [] }],
+      savedRoutes: [
+        { id: 'test-1', name: 'Test', dates: '', duration: '', tags: [], itinerary: [] },
+      ],
     });
     useRouteStore.getState().deleteRoute('test-1');
     expect(useRouteStore.getState().savedRoutes.length).toBe(0);
@@ -92,7 +94,9 @@ describe('useRouteStore', () => {
 
   it('should update route itinerary by id', () => {
     useRouteStore.setState({
-      savedRoutes: [{ id: 'test-1', name: 'Test', dates: '', duration: '', tags: [], itinerary: [] }],
+      savedRoutes: [
+        { id: 'test-1', name: 'Test', dates: '', duration: '', tags: [], itinerary: [] },
+      ],
     });
     const newPlaces = [{ id: 'p1', name: 'Place 1', category: 'Category', address: 'Addr' }];
     useRouteStore.getState().updateRouteItinerary('test-1', newPlaces);

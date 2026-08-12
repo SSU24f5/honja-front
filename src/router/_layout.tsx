@@ -1,10 +1,3 @@
-<<<<<<< HEAD
-=======
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { useFonts } from 'expo-font';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
->>>>>>> origin/develop
 import { AnimatedSplashOverlay } from '@/components/common/animated-icon';
 import AppTabs from '@/components/common/app-tabs';
 import { QueryProvider } from '@/providers/QueryProvider';

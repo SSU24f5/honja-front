@@ -1,8 +1,8 @@
-import { useTheme } from '@/hooks/use-theme';
-import { Spacing } from '@/styles/theme';
 import { useState } from 'react';
 import type { StyleProp, TextInputProps, ViewStyle } from 'react-native';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useTheme } from '@/hooks/use-theme';
+import { Spacing } from '@/styles/theme';
 
 type HintStatus = 'error' | 'success' | 'info';
 

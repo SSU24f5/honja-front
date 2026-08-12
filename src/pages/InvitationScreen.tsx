@@ -33,13 +33,19 @@ export function InvitationScreen() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemedView type="backgroundElement" style={[styles.container, { backgroundColor: TripColors.screenBackground }]}>
+      <ThemedView
+        type="backgroundElement"
+        style={[styles.container, { backgroundColor: TripColors.screenBackground }]}
+      >
         <SafeAreaView style={styles.safeArea}>
           <ScrollView
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
-            <ThemedText type="subtitle" style={[styles.headerTitle, { color: TripColors.titleText }]}>
+            <ThemedText
+              type="subtitle"
+              style={[styles.headerTitle, { color: TripColors.titleText }]}
+            >
               여행 초대장
             </ThemedText>
 

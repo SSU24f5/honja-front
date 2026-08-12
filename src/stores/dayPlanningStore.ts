@@ -1,6 +1,6 @@
 import { create } from 'zustand';
-import type { RoutePlace } from './routeStore';
 import type { DayPlan, SearchTarget } from '@/pages/route/constants';
+import type { RoutePlace } from './routeStore';
 
 interface DayPlanningState {
   /** 선택된 여행 ID */
@@ -23,6 +23,8 @@ interface DayPlanningState {
   removeWaypoint: (index: number) => void;
   moveWaypointUp: (index: number) => void;
   moveWaypointDown: (index: number) => void;
+  reorderWaypoints: (waypoints: RoutePlace[]) => void;
+  addRecommendedWaypoints: (places: RoutePlace[]) => void;
   resetDayPlans: () => void;
 }
 
@@ -33,8 +35,7 @@ export const useDayPlanningStore = create<DayPlanningState>((set, get) => ({
   searchModalVisible: false,
   searchTarget: null,
 
-  setSelectedRouteId: (id) =>
-    set({ selectedRouteId: id, selectedDayIdx: 0, dayPlans: {} }),
+  setSelectedRouteId: (id) => set({ selectedRouteId: id, selectedDayIdx: 0, dayPlans: {} }),
 
   setSelectedDayIdx: (idx) => set({ selectedDayIdx: idx }),
 
@@ -84,10 +85,7 @@ export const useDayPlanningStore = create<DayPlanningState>((set, get) => ({
         waypoints: [],
         end: null,
       };
-      const updated =
-        type === 'start'
-          ? { ...existing, start: null }
-          : { ...existing, end: null };
+      const updated = type === 'start' ? { ...existing, start: null } : { ...existing, end: null };
       return { dayPlans: { ...dayPlans, [selectedDayIdx]: updated } };
     }),
 
@@ -138,6 +136,48 @@ export const useDayPlanningStore = create<DayPlanningState>((set, get) => ({
       [waypoints[index], waypoints[index + 1]] = [waypoints[index + 1], waypoints[index]];
       return {
         dayPlans: { ...dayPlans, [selectedDayIdx]: { ...existing, waypoints } },
+      };
+    }),
+
+  reorderWaypoints: (waypoints) =>
+    set((state) => {
+      const { selectedDayIdx, dayPlans } = state;
+      const existing: DayPlan = dayPlans[selectedDayIdx] ?? {
+        start: null,
+        waypoints: [],
+        end: null,
+      };
+      return {
+        dayPlans: {
+          ...dayPlans,
+          [selectedDayIdx]: { ...existing, waypoints },
+        },
+      };
+    }),
+
+  addRecommendedWaypoints: (places) =>
+    set((state) => {
+      const { selectedDayIdx, dayPlans } = state;
+      const existing: DayPlan = dayPlans[selectedDayIdx] ?? {
+        start: null,
+        waypoints: [],
+        end: null,
+      };
+      const existingIds = new Set(existing.waypoints.map((wp) => wp.id));
+      const newWaypoints = [...existing.waypoints];
+
+      places.forEach((p) => {
+        if (!existingIds.has(p.id)) {
+          newWaypoints.push(p);
+          existingIds.add(p.id);
+        }
+      });
+
+      return {
+        dayPlans: {
+          ...dayPlans,
+          [selectedDayIdx]: { ...existing, waypoints: newWaypoints },
+        },
       };
     }),
 

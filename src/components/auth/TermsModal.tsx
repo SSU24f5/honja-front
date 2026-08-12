@@ -1,6 +1,6 @@
+import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTheme } from '@/hooks/use-theme';
 import { Spacing } from '@/styles/theme';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 interface TermsModalProps {
   visible: boolean;

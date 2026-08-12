@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { useDayPlanningStore } from '@/stores/dayPlanningStore';
 import type { DayPlan } from '@/pages/route/constants';
+import { useDayPlanningStore } from '@/stores/dayPlanningStore';
 
 /**
  * DayPlanningStep에 필요한 상태와 액션을 제공하는 커스텀 훅.
@@ -20,6 +20,7 @@ export function useDayPlanning() {
   const removeWaypoint = useDayPlanningStore((s) => s.removeWaypoint);
   const moveWaypointUp = useDayPlanningStore((s) => s.moveWaypointUp);
   const moveWaypointDown = useDayPlanningStore((s) => s.moveWaypointDown);
+  const reorderWaypoints = useDayPlanningStore((s) => s.reorderWaypoints);
   const resetDayPlans = useDayPlanningStore((s) => s.resetDayPlans);
   const setSelectedRouteId = useDayPlanningStore((s) => s.setSelectedRouteId);
 
@@ -47,6 +48,7 @@ export function useDayPlanning() {
     removeWaypoint,
     moveWaypointUp,
     moveWaypointDown,
+    reorderWaypoints,
     resetDayPlans,
   };
 }

@@ -1,15 +1,15 @@
+import { TabTrigger } from 'expo-router/ui';
 import { useState } from 'react';
 import { FlatList, Pressable, SafeAreaView, StyleSheet, View } from 'react-native';
-import { TabTrigger } from 'expo-router/ui';
-import { AppIcon } from '@/components/common/AppIcon';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { AppIcon } from '@/components/common/AppIcon';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
-import { useTheme } from '@/hooks/use-theme';
-import { Spacing } from '@/styles/theme';
-import { useRouteStore, type SavedRoute } from '@/stores/routeStore';
-import { TripCard, type TripCardData } from '@/components/route/TripCard';
 import { DeleteConfirmModal } from '@/components/route/DeleteConfirmModal';
+import { TripCard, type TripCardData } from '@/components/route/TripCard';
+import { useTheme } from '@/hooks/use-theme';
+import { type SavedRoute, useRouteStore } from '@/stores/routeStore';
+import { Spacing } from '@/styles/theme';
 
 // store의 SavedRoute -> 카드가 원하는 형태로 변환
 function toTripCardData(route: SavedRoute): TripCardData {
@@ -61,9 +61,7 @@ export function MyTripsScreen() {
           <FlatList
             data={trips}
             keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <TripCard trip={item} onRequestDelete={setTargetTrip} />
-            )}
+            renderItem={({ item }) => <TripCard trip={item} onRequestDelete={setTargetTrip} />}
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
           />

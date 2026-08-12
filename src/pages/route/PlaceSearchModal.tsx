@@ -25,10 +25,15 @@ interface PlaceSearchModalProps {
 function toRoutePlace(item: PlaceSearchItem): RoutePlace {
   return {
     id: item.contentid,
+    contentId: item.contentid,
+    contentTypeId: item.contenttypeid,
     name: item.title,
+    title: item.title,
     category: item.contenttypeid,
     address: item.addr1 + (item.addr2 ? ` ${item.addr2}` : ''),
     image: item.firstimage || item.firstimage2 || undefined,
+    mapx: item.mapx,
+    mapy: item.mapy,
   };
 }
 
@@ -52,34 +57,33 @@ export function PlaceSearchModal({ courseType, onSelectPlace, onClose }: PlaceSe
   const activeCourseType = THEME_TO_COURSE_TYPE[selectedCategory] || 'GENERAL';
 
   // 디바운스 검색
-  const performSearch = useCallback(
-    async (keyword: string, catType: CourseType) => {
-      if (!keyword.trim()) {
-        setResults([]);
-        setHasSearched(false);
-        return;
-      }
+  const performSearch = useCallback(async (keyword: string, catType: CourseType) => {
+    if (!keyword.trim()) {
+      setResults([]);
+      setHasSearched(false);
+      return;
+    }
 
-      setIsSearching(true);
-      try {
-        console.log(`[PlaceSearch] Calling searchPlaces with keyword="${keyword.trim()}", catType="${catType}"`);
-        const response = await searchPlaces(keyword.trim(), catType);
-        console.log('[PlaceSearch] Response:', response);
-        if (response.isSuccess && response.data) {
-          setResults(response.data.map(toRoutePlace));
-        } else {
-          setResults([]);
-        }
-      } catch (err) {
-        console.error('[PlaceSearch] Error performing search:', err);
+    setIsSearching(true);
+    try {
+      console.log(
+        `[PlaceSearch] Calling searchPlaces with keyword="${keyword.trim()}", catType="${catType}"`,
+      );
+      const response = await searchPlaces(keyword.trim(), catType);
+      console.log('[PlaceSearch] Response:', response);
+      if (response.isSuccess && response.data) {
+        setResults(response.data.map(toRoutePlace));
+      } else {
         setResults([]);
-      } finally {
-        setIsSearching(false);
-        setHasSearched(true);
       }
-    },
-    [],
-  );
+    } catch (err) {
+      console.error('[PlaceSearch] Error performing search:', err);
+      setResults([]);
+    } finally {
+      setIsSearching(false);
+      setHasSearched(true);
+    }
+  }, []);
 
   const handleChangeText = (text: string) => {
     setSearchQuery(text);
@@ -108,12 +112,7 @@ export function PlaceSearchModal({ courseType, onSelectPlace, onClose }: PlaceSe
   }, []);
 
   return (
-    <ThemedView
-      style={[
-        styles.modalContainer,
-        { paddingTop: safeAreaInsets.top },
-      ]}
-    >
+    <ThemedView style={[styles.modalContainer, { paddingTop: safeAreaInsets.top }]}>
       {/* Header: Back + Search + Category */}
       <View style={styles.modalHeader}>
         <Pressable onPress={onClose} style={styles.modalBackBtn}>

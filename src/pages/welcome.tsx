@@ -18,10 +18,14 @@ export default function WelcomeScreen() {
         </View>
 
         <View style={styles.buttonArea}>
-          <Button label="로그인 하기" onPress={() => router.push('/login')} variant="primary" />
+          <Button
+            label="로그인 하기"
+            onPress={() => router.push('/login' as any)}
+            variant="primary"
+          />
           <Button
             label="회원가입 하기"
-            onPress={() => router.push('/signup')}
+            onPress={() => router.push('/signup' as any)}
             variant="secondary"
           />
         </View>

@@ -1,4 +1,4 @@
-const BASE_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:8080';
+import { getApiBaseUrl } from '@/api/client';
 
 export type CourseType = 'BARRIER_FREE' | 'PET' | 'GENERAL';
 export type TripCategory = 'ALONE' | 'FAMILY' | 'FRIEND' | 'LOVER' | 'ETC';
@@ -31,7 +31,8 @@ export interface CreateCourseResponse {
 }
 
 export async function createCourse(body: CreateCourseRequest): Promise<CreateCourseResponse> {
-  const response = await fetch(`${BASE_URL}/courses`, {
+  const baseUrl = getApiBaseUrl();
+  const response = await fetch(`${baseUrl}/courses`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -88,7 +89,8 @@ export async function searchPlaces(
     numOfRows: '10',
   });
 
-  const requestUrl = `${BASE_URL}${path}?${params}`;
+  const baseUrl = getApiBaseUrl();
+  const requestUrl = `${baseUrl}${path}?${params}`;
   console.log(`[API Client] Fetching: ${requestUrl}`);
   const response = await fetch(requestUrl, {
     method: 'GET',

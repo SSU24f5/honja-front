@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 import LeftBackIcon from '@/assets/icon/basic/left_back.svg';
 import { ThemedText } from '@/components/common/themed-text';
+import { useTheme } from '@/hooks/use-theme';
 import { THEME_CATEGORIES } from './constants';
 import { styles } from './createRouteStyles';
 
@@ -65,6 +66,7 @@ export function BasicInfoStep({
   onPrevMonth,
   onNextMonth,
 }: BasicInfoStepProps) {
+  const theme = useTheme();
   // Build the formatted date display string
   const dateDisplayText = useMemo(() => {
     if (startDate === null) return '';
@@ -220,10 +222,7 @@ export function BasicInfoStep({
                   <ThemedText
                     type="small"
                     numberOfLines={1}
-                    style={[
-                      styles.categoryBadgeText,
-                      isSelected && styles.categoryBadgeTextActive,
-                    ]}
+                    style={[styles.categoryBadgeText, isSelected && styles.categoryBadgeTextActive]}
                   >
                     {cat}
                   </ThemedText>
@@ -255,7 +254,9 @@ export function BasicInfoStep({
           disabled={!isFormValid || isCreating}
           style={({ pressed }) => [
             styles.submitBtn,
-            isFormValid && !isCreating ? styles.submitBtnActive : styles.submitBtnDisabled,
+            isFormValid && !isCreating
+              ? [styles.submitBtnActive, { backgroundColor: theme.brandPrimary }]
+              : styles.submitBtnDisabled,
             pressed && isFormValid && !isCreating && styles.pressed,
           ]}
         >

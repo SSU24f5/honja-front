@@ -1,22 +1,14 @@
+import { useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
+import { Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { createCourse } from '@/api/dto/client';
 import { ThemedView } from '@/components/common/themed-view';
 import { useTheme } from '@/hooks/use-theme';
 import { useRouteStore } from '@/stores/routeStore';
 import { BottomTabInset, Spacing } from '@/styles/theme';
-import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-} from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BasicInfoStep } from './BasicInfoStep';
-import {
-  COMPANION_TO_TRIP_CATEGORY,
-  THEME_TO_COURSE_TYPE,
-} from './constants';
+import { COMPANION_TO_TRIP_CATEGORY, THEME_TO_COURSE_TYPE } from './constants';
 import { styles } from './createRouteStyles';
 
 export default function CreateRouteScreen() {
