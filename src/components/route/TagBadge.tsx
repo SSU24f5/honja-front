@@ -1,40 +1,33 @@
 import { StyleSheet } from 'react-native';
 import { ThemedText } from '@/components/common/themed-text';
-import { ThemedView } from '@/components/common/themed-view';
-import { Spacing } from '@/styles/theme';
-import { TripColors } from '@/styles/tripColors';
+import { View } from 'react-native';
 
 interface TagBadgeProps {
   label: string;
 }
 
+// 실제 route.tsx의 routeCardBadge 스타일과 동일하게 맞춘 동행유형 뱃지
 export function TagBadge({ label }: TagBadgeProps) {
-  const isGeneral = label === '일반';
-
   return (
-    <ThemedView
-      style={[
-        styles.badge,
-        { backgroundColor: isGeneral ? TripColors.tagGeneral : TripColors.tagNeutral },
-      ]}
-    >
-      <ThemedText type="smallBold" style={[styles.label, { color: TripColors.titleText }]}>
+    <View style={styles.badge}>
+      <ThemedText style={styles.label} numberOfLines={1}>
         {label}
       </ThemedText>
-    </ThemedView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   badge: {
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.half,
-    borderRadius: 12,
-    marginRight: Spacing.one,
-    alignSelf: 'flex-start',
+    backgroundColor: '#91A267',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    flexShrink: 0,
   },
   label: {
-    fontSize: 12,
-    lineHeight: 16,
+    fontSize: 11,
+    color: '#FFFFFF',
+    fontWeight: '700',
   },
 });

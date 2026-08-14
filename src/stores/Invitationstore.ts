@@ -3,8 +3,8 @@ import { create } from 'zustand';
 
 export interface Invitation {
   id: string;
-  /** 예: ['일반', '혼자'] / ['일반', '친구와 함께'] / ['일반', '가족과 함께'] */
-  tags: string[];
+  /** 동행유형 뱃지 예: '일반' / '배리어프리' / '애인과 함께' */
+  tag: string;
   title: string;
   dateRangeText: string;
   /**
@@ -28,13 +28,13 @@ export const useInvitationStore = create<InvitationState>((set) => ({
   receivedInvitations: [
     {
       id: 'invite-1',
-      tags: ['일반', '혼자'],
+      tag: '일반',
       title: '혼자왓수다',
       dateRangeText: '26.07.10. ~ 26.07.14. (4박 5일)',
     },
     {
       id: 'invite-2',
-      tags: ['일반', '친구와 함께'],
+      tag: '배리어프리',
       title: '셋이왓수다',
       dateRangeText: '26.07.10. ~ 26.07.14. (4박 5일)',
       avatars: [
@@ -46,7 +46,7 @@ export const useInvitationStore = create<InvitationState>((set) => ({
   sentInvitations: [
     {
       id: 'invite-3',
-      tags: ['일반', '가족과 함께'],
+      tag: '애인과 함께',
       title: '둘이왓수다',
       dateRangeText: '26.07.10. ~ 26.07.14. (4박 5일)',
       avatars: [{ uri: 'https://i.pravatar.cc/100?img=3' }],

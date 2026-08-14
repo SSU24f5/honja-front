@@ -1,14 +1,46 @@
 import { useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
+import { TabTrigger } from 'expo-router/ui';
+import { useRouter } from 'expo-router';
+import { AppIcon } from '@/components/common/AppIcon';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
-import { ConfirmModal } from '@/components/route/Confirmmodal';
-import { InvitationCard } from '@/components/route/InvitationCard';
-import { SentInvitationCard } from '@/components/route/SentInvitationCard';
-import { type Invitation, useInvitationStore } from '@/stores/Invitationstore';
+import { ParticipateModal } from '@/components/route/ParticipateModal';
+import { TripListCard, type TripListCardData } from '@/components/route/TripListCard';
+import { type Invitation, useInvitationStore } from '@/stores/invitationStore';
 import { Spacing } from '@/styles/theme';
-import { TripColors } from '@/styles/tripColors';
+
+function toTripListCardData(invitation: Invitation): TripListCardData {
+  return {
+    id: invitation.id,
+    tag: invitation.tag,
+    title: invitation.title,
+    dateRangeText: invitation.dateRangeText,
+    avatars: invitation.avatars,
+  };
+}
+
+// expo-router/ui의 TabTrigger는 웹(app-tabs.web.tsx)의 커스텀 Tabs 안에서만 동작함.
+// 네이티브는 일반 expo-router Tabs를 쓰므로 그냥 router.push로 이동.
+function BackButton() {
+  const router = useRouter();
+
+  if (Platform.OS === 'web') {
+    return (
+      <TabTrigger name="route" asChild>
+        <Pressable hitSlop={8} style={styles.backButton}>
+          <AppIcon name="chevronLeft" size={22} color="#222222" />
+        </Pressable>
+      </TabTrigger>
+    );
+  }
+
+  return (
+    <Pressable hitSlop={8} style={styles.backButton} onPress={() => router.push('/route')}>
+      <AppIcon name="chevronLeft" size={22} color="#222222" />
+    </Pressable>
+  );
+}
 
 export function InvitationScreen() {
   const receivedInvitations = useInvitationStore((state) => state.receivedInvitations);
@@ -16,104 +48,90 @@ export function InvitationScreen() {
   const acceptInvitation = useInvitationStore((state) => state.acceptInvitation);
   const rejectInvitation = useInvitationStore((state) => state.rejectInvitation);
 
-  const [acceptTarget, setAcceptTarget] = useState<Invitation | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<Invitation | null>(null);
+  const [target, setTarget] = useState<TripListCardData | null>(null);
 
-  const handleConfirmAccept = () => {
-    if (!acceptTarget) return;
-    acceptInvitation(acceptTarget.id);
-    setAcceptTarget(null);
+  const handleReject = () => {
+    if (!target) return;
+    rejectInvitation(target.id);
+    setTarget(null);
   };
 
-  const handleConfirmReject = () => {
-    if (!rejectTarget) return;
-    rejectInvitation(rejectTarget.id);
-    setRejectTarget(null);
+  const handleParticipate = () => {
+    if (!target) return;
+    acceptInvitation(target.id);
+    setTarget(null);
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemedView
-        type="backgroundElement"
-        style={[styles.container, { backgroundColor: TripColors.screenBackground }]}
-      >
-        <SafeAreaView style={styles.safeArea}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <ThemedText
-              type="subtitle"
-              style={[styles.headerTitle, { color: TripColors.titleText }]}
-            >
-              여행 초대장
-            </ThemedText>
+    <ThemedView style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}>
+          <BackButton />
+          <ThemedText style={styles.headerTitle}>여행 초대장</ThemedText>
+        </View>
 
-            <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionTitle}>
-              초대받은 여행
-            </ThemedText>
-            <View style={styles.list}>
-              {receivedInvitations.map((invitation) => (
-                <InvitationCard
-                  key={invitation.id}
-                  invitation={invitation}
-                  onRequestAccept={setAcceptTarget}
-                  onRequestReject={setRejectTarget}
-                />
-              ))}
-            </View>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <ThemedText style={styles.sectionTitle}>초대받은 여행</ThemedText>
+          <View style={styles.list}>
+            {receivedInvitations.map((invitation) => (
+              <TripListCard
+                key={invitation.id}
+                trip={toTripListCardData(invitation)}
+                onPress={setTarget}
+              />
+            ))}
+          </View>
 
-            <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionTitle}>
-              초대한 여행
-            </ThemedText>
-            <View style={styles.list}>
-              {sentInvitations.map((invitation) => (
-                <SentInvitationCard key={invitation.id} invitation={invitation} />
-              ))}
-            </View>
-          </ScrollView>
+          <ThemedText style={styles.sectionTitle}>초대한 여행</ThemedText>
+          <View style={styles.list}>
+            {sentInvitations.map((invitation) => (
+              <TripListCard key={invitation.id} trip={toTripListCardData(invitation)} />
+            ))}
+          </View>
+        </ScrollView>
 
-          <ConfirmModal
-            visible={acceptTarget !== null}
-            message="여행 초대를 수락하시겠습니까?"
-            confirmLabel="수락"
-            confirmColor={TripColors.success}
-            onCancel={() => setAcceptTarget(null)}
-            onConfirm={handleConfirmAccept}
-          />
-
-          <ConfirmModal
-            visible={rejectTarget !== null}
-            message="여행 초대를 거부하시겠습니까?"
-            confirmLabel="거부"
-            onCancel={() => setRejectTarget(null)}
-            onConfirm={handleConfirmReject}
-          />
-        </SafeAreaView>
-      </ThemedView>
-    </GestureHandlerRootView>
+        <ParticipateModal
+          visible={target !== null}
+          tripTitle={target?.title ?? ''}
+          onReject={handleReject}
+          onParticipate={handleParticipate}
+        />
+      </SafeAreaView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   safeArea: {
     flex: 1,
   },
-  scrollContent: {
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.three,
     paddingTop: Spacing.two,
-    paddingBottom: Spacing.five,
+    paddingBottom: Spacing.three,
+  },
+  backButton: {
+    paddingRight: Spacing.two,
+    paddingVertical: Spacing.one,
   },
   headerTitle: {
-    fontSize: 22,
-    lineHeight: 28,
-    paddingHorizontal: Spacing.four,
-    marginBottom: Spacing.three,
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#222222',
+  },
+  scrollContent: {
+    paddingBottom: Spacing.five,
   },
   sectionTitle: {
     fontSize: 14,
+    fontWeight: '600',
+    color: '#60646C',
     paddingHorizontal: Spacing.four,
     marginBottom: Spacing.two,
   },
