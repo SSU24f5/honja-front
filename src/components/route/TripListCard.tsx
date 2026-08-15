@@ -7,26 +7,23 @@ import { TagBadge } from './TagBadge';
 
 export interface TripListCardData {
   id: string;
-  /** 동행유형 뱃지 (예: '일반', '배리어프리', '애인과 함께' 등) */
-  tag: string;
+  tag?: string;
   title: string;
   description?: string;
   dateRangeText: string;
   avatars?: ImageSourcePropType[];
-  /** 아바타 외 추가 인원 수 (있으면 '+N'으로 표시) */
   extraParticipants?: number;
 }
 
 interface TripListCardProps {
   trip: TripListCardData;
-  /** 카드 전체를 누를 수 있게 하려면 지정 (초대받은 여행 카드 등) */
   onPress?: (trip: TripListCardData) => void;
-  /** '···' 메뉴 버튼을 보여주려면 지정 (삭제 등 카드별 액션) */
   onMenuPress?: (trip: TripListCardData) => void;
 }
 
-// 여러 화면(내 여행 / 초대받은 여행 / 초대한 여행)에서 공통으로 쓰는 카드
 export function TripListCard({ trip, onPress, onMenuPress }: TripListCardProps) {
+  const hasAvatarRow = (trip.avatars && trip.avatars.length > 0) || !!trip.extraParticipants;
+
   const content = (
     <View style={styles.card}>
       <View style={styles.topRow}>
@@ -37,7 +34,7 @@ export function TripListCard({ trip, onPress, onMenuPress }: TripListCardProps) 
         </View>
 
         <View style={styles.topRowRight}>
-          <TagBadge label={trip.tag} />
+          {trip.tag ? <TagBadge label={trip.tag} /> : null}
           {onMenuPress ? (
             <Pressable hitSlop={8} style={styles.menuButton} onPress={() => onMenuPress(trip)}>
               <AppIcon name="more" size={18} color="#60646C" />
@@ -56,14 +53,17 @@ export function TripListCard({ trip, onPress, onMenuPress }: TripListCardProps) 
         </ThemedText>
       ) : null}
 
-      <View style={styles.divider} />
-
-      <View style={styles.avatarRow}>
-        <AvatarStack avatars={trip.avatars ?? []} />
-        {trip.extraParticipants ? (
-          <ThemedText style={styles.extraCount}>+{trip.extraParticipants}</ThemedText>
-        ) : null}
-      </View>
+      {hasAvatarRow ? (
+        <>
+          <View style={styles.divider} />
+          <View style={styles.avatarRow}>
+            <AvatarStack avatars={trip.avatars ?? []} />
+            {trip.extraParticipants ? (
+              <ThemedText style={styles.extraCount}>+{trip.extraParticipants}</ThemedText>
+            ) : null}
+          </View>
+        </>
+      ) : null}
     </View>
   );
 

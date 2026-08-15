@@ -1,4 +1,4 @@
-import { get, put } from '@/api/client';
+import { get, put, del } from '@/api/client';
 import type { CourseType } from '@/api/dto/client';
 
 export interface CourseListResponseDto {
@@ -6,8 +6,8 @@ export interface CourseListResponseDto {
   name: string;
   description: string;
   isPublic: boolean;
-  startDate: string; // e.g. "2026-08-08"
-  endDate: string; // e.g. "2026-08-11"
+  startDate: string; 
+  endDate: string; 
   courseType: CourseType | string;
   profiles: string[];
   createdAt: string;
@@ -87,4 +87,8 @@ export function getCourseDetail(courseId: number) {
 
 export function updateCoursePlaces(body: UpdateCourseRequestDto) {
   return put<CourseDetailResponseDto>('/courses', body);
+}
+
+export function deleteCourse(courseId: number): Promise<string> {
+  return del<string>(`/courses/${courseId}`);
 }

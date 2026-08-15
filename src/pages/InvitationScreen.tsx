@@ -1,5 +1,13 @@
 import { useState } from 'react';
-import { Platform, Pressable, SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { TabTrigger } from 'expo-router/ui';
 import { useRouter } from 'expo-router';
 import { AppIcon } from '@/components/common/AppIcon';
@@ -7,21 +15,35 @@ import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
 import { ParticipateModal } from '@/components/route/ParticipateModal';
 import { TripListCard, type TripListCardData } from '@/components/route/TripListCard';
-import { type Invitation, useInvitationStore } from '@/stores/invitationStore';
+import {
+  useAcceptInvitation,
+  useReceivedInvitations,
+  useRejectInvitation,
+  useSentInvitations,
+} from '@/hooks/use-invitations';
+import { formatShortDate } from '@/utils/course-type';
+import type { CourseInvitationResponseDto } from '@/api/invitation';
 import { Spacing } from '@/styles/theme';
 
-function toTripListCardData(invitation: Invitation): TripListCardData {
+function toReceivedCardData(invitation: CourseInvitationResponseDto): TripListCardData {
   return {
-    id: invitation.id,
-    tag: invitation.tag,
-    title: invitation.title,
-    dateRangeText: invitation.dateRangeText,
-    avatars: invitation.avatars,
+    id: String(invitation.courseMemberId),
+    title: invitation.courseName,
+    description: invitation.courseDescription,
+    dateRangeText: `${invitation.counterpartNickname}님의 초대 · ${formatShortDate(invitation.createdAt)}`,
   };
 }
 
-// expo-router/ui의 TabTrigger는 웹(app-tabs.web.tsx)의 커스텀 Tabs 안에서만 동작함.
-// 네이티브는 일반 expo-router Tabs를 쓰므로 그냥 router.push로 이동.
+function toSentCardData(invitation: CourseInvitationResponseDto): TripListCardData {
+  return {
+    id: String(invitation.courseMemberId),
+    title: invitation.courseName,
+    description: invitation.courseDescription,
+    dateRangeText: `${invitation.counterpartNickname}님에게 초대 · ${formatShortDate(invitation.createdAt)}`,
+  };
+}
+
+
 function BackButton() {
   const router = useRouter();
 
@@ -43,23 +65,31 @@ function BackButton() {
 }
 
 export function InvitationScreen() {
-  const receivedInvitations = useInvitationStore((state) => state.receivedInvitations);
-  const sentInvitations = useInvitationStore((state) => state.sentInvitations);
-  const acceptInvitation = useInvitationStore((state) => state.acceptInvitation);
-  const rejectInvitation = useInvitationStore((state) => state.rejectInvitation);
+  const {
+    data: receivedInvitations,
+    isLoading: isReceivedLoading,
+  } = useReceivedInvitations();
+  const { data: sentInvitations, isLoading: isSentLoading } = useSentInvitations();
+  const acceptMutation = useAcceptInvitation();
+  const rejectMutation = useRejectInvitation();
 
   const [target, setTarget] = useState<TripListCardData | null>(null);
 
+  const pendingReceived = (receivedInvitations ?? []).filter((inv) => inv.status === 'PENDING');
+  const pendingSent = (sentInvitations ?? []).filter((inv) => inv.status === 'PENDING');
+
   const handleReject = () => {
     if (!target) return;
-    rejectInvitation(target.id);
-    setTarget(null);
+    rejectMutation.mutate(Number(target.id), {
+      onSettled: () => setTarget(null),
+    });
   };
 
   const handleParticipate = () => {
     if (!target) return;
-    acceptInvitation(target.id);
-    setTarget(null);
+    acceptMutation.mutate(Number(target.id), {
+      onSettled: () => setTarget(null),
+    });
   };
 
   return (
@@ -72,22 +102,39 @@ export function InvitationScreen() {
 
         <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
           <ThemedText style={styles.sectionTitle}>초대받은 여행</ThemedText>
-          <View style={styles.list}>
-            {receivedInvitations.map((invitation) => (
-              <TripListCard
-                key={invitation.id}
-                trip={toTripListCardData(invitation)}
-                onPress={setTarget}
-              />
-            ))}
-          </View>
+          {isReceivedLoading ? (
+            <ActivityIndicator style={styles.loading} color="#FF6623" />
+          ) : (
+            <View style={styles.list}>
+              {pendingReceived.map((invitation) => (
+                <TripListCard
+                  key={invitation.courseMemberId}
+                  trip={toReceivedCardData(invitation)}
+                  onPress={setTarget}
+                />
+              ))}
+              {pendingReceived.length === 0 ? (
+                <ThemedText style={styles.emptyText}>받은 초대가 없어요</ThemedText>
+              ) : null}
+            </View>
+          )}
 
-          <ThemedText style={styles.sectionTitle}>초대한 여행</ThemedText>
-          <View style={styles.list}>
-            {sentInvitations.map((invitation) => (
-              <TripListCard key={invitation.id} trip={toTripListCardData(invitation)} />
-            ))}
-          </View>
+          <ThemedText style={styles.sectionTitle}>초대안 여행</ThemedText>
+          {isSentLoading ? (
+            <ActivityIndicator style={styles.loading} color="#FF6623" />
+          ) : (
+            <View style={styles.list}>
+              {pendingSent.map((invitation) => (
+                <TripListCard
+                  key={invitation.courseMemberId}
+                  trip={toSentCardData(invitation)}
+                />
+              ))}
+              {pendingSent.length === 0 ? (
+                <ThemedText style={styles.emptyText}>보낸 초대가 없어요</ThemedText>
+              ) : null}
+            </View>
+          )}
         </ScrollView>
 
         <ParticipateModal
@@ -137,5 +184,14 @@ const styles = StyleSheet.create({
   },
   list: {
     marginBottom: Spacing.four,
+  },
+  loading: {
+    marginBottom: Spacing.four,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: '#AAAAAA',
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two,
   },
 });
