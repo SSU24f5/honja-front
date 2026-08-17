@@ -93,3 +93,18 @@ export async function put<T>(path: string, body: unknown): Promise<T> {
   }
   return json.data;
 }
+
+export async function del<T>(path: string): Promise<T> {
+  const baseUrl = getApiBaseUrl();
+  console.log(`[API DELETE] ${baseUrl}${path}`);
+  const res = await fetch(`${baseUrl}${path}`, {
+    method: 'DELETE',
+    headers: getHeaders(),
+  });
+  const json: ApiResponse<T> = await res.json();
+  console.log(`[API DELETE Response ${path}]:\n`, JSON.stringify(json, null, 2));
+  if (!res.ok || !json.isSuccess) {
+    throw new Error(json.message || '요청에 실패했습니다.');
+  }
+  return json.data;
+}

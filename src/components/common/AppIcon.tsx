@@ -1,10 +1,10 @@
-import { Ionicons } from '@expo/vector-icons';
-import { SymbolView } from 'expo-symbols';
 import type { ComponentProps } from 'react';
 import { Platform, Text } from 'react-native';
+import { SymbolView } from 'expo-symbols';
+import { Ionicons } from '@expo/vector-icons';
 
 // 여기서 쓰는 아이콘 종류만 우선 등록. 필요하면 추가하면 됨.
-export type AppIconName = 'envelope' | 'trash' | 'exchange';
+export type AppIconName = 'envelope' | 'trash' | 'exchange' | 'more' | 'chevronLeft';
 
 // SymbolView가 기대하는 name 타입을 그대로 가져와서 맵 타입에 사용
 type SFSymbolName = ComponentProps<typeof SymbolView>['name'];
@@ -14,6 +14,8 @@ const SYMBOL_NAME_MAP: Record<AppIconName, SFSymbolName> = {
   envelope: 'envelope',
   trash: 'trash',
   exchange: 'arrow.triangle.2.circlepath',
+  more: 'ellipsis',
+  chevronLeft: 'chevron.left',
 };
 
 // 웹 / Android: Ionicons 이름
@@ -21,12 +23,16 @@ const IONICON_NAME_MAP: Record<AppIconName, keyof typeof Ionicons.glyphMap> = {
   envelope: 'mail',
   trash: 'trash-outline',
   exchange: 'sync-outline',
+  more: 'ellipsis-horizontal',
+  chevronLeft: 'chevron-back',
 };
 
 // Ionicons 폰트/버전 문제로 렌더링이 불안정했던 아이콘은
 // 폰트에 의존하지 않는 유니코드 문자로 대체 (envelope가 계속 안 보이던 문제 해결용)
 const UNICODE_FALLBACK_MAP: Partial<Record<AppIconName, string>> = {
   envelope: '\u2709', // ✉
+  more: '\u22EF', // ⋯
+  chevronLeft: '\u2039', // ‹
 };
 
 interface AppIconProps {

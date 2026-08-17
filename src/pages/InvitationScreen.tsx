@@ -1,123 +1,197 @@
 import { useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, View } from 'react-native';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import {
+  ActivityIndicator,
+  Platform,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  View,
+} from 'react-native';
+import { TabTrigger } from 'expo-router/ui';
+import { useRouter } from 'expo-router';
+import { AppIcon } from '@/components/common/AppIcon';
 import { ThemedText } from '@/components/common/themed-text';
 import { ThemedView } from '@/components/common/themed-view';
-import { ConfirmModal } from '@/components/route/Confirmmodal';
-import { InvitationCard } from '@/components/route/InvitationCard';
-import { SentInvitationCard } from '@/components/route/SentInvitationCard';
-import { type Invitation, useInvitationStore } from '@/stores/Invitationstore';
+import { ParticipateModal } from '@/components/route/ParticipateModal';
+import { TripListCard, type TripListCardData } from '@/components/route/TripListCard';
+import {
+  useAcceptInvitation,
+  useReceivedInvitations,
+  useRejectInvitation,
+  useSentInvitations,
+} from '@/hooks/use-invitations';
+import { formatShortDate } from '@/utils/course-type';
+import type { CourseInvitationResponseDto } from '@/api/invitation';
 import { Spacing } from '@/styles/theme';
-import { TripColors } from '@/styles/tripColors';
+
+function toReceivedCardData(invitation: CourseInvitationResponseDto): TripListCardData {
+  return {
+    id: String(invitation.courseMemberId),
+    title: invitation.courseName,
+    description: invitation.courseDescription,
+    dateRangeText: `${invitation.counterpartNickname}님의 초대 · ${formatShortDate(invitation.createdAt)}`,
+  };
+}
+
+function toSentCardData(invitation: CourseInvitationResponseDto): TripListCardData {
+  return {
+    id: String(invitation.courseMemberId),
+    title: invitation.courseName,
+    description: invitation.courseDescription,
+    dateRangeText: `${invitation.counterpartNickname}님에게 초대 · ${formatShortDate(invitation.createdAt)}`,
+  };
+}
+
+
+function BackButton() {
+  const router = useRouter();
+
+  if (Platform.OS === 'web') {
+    return (
+      <TabTrigger name="route" asChild>
+        <Pressable hitSlop={8} style={styles.backButton}>
+          <AppIcon name="chevronLeft" size={22} color="#222222" />
+        </Pressable>
+      </TabTrigger>
+    );
+  }
+
+  return (
+    <Pressable hitSlop={8} style={styles.backButton} onPress={() => router.push('/route')}>
+      <AppIcon name="chevronLeft" size={22} color="#222222" />
+    </Pressable>
+  );
+}
 
 export function InvitationScreen() {
-  const receivedInvitations = useInvitationStore((state) => state.receivedInvitations);
-  const sentInvitations = useInvitationStore((state) => state.sentInvitations);
-  const acceptInvitation = useInvitationStore((state) => state.acceptInvitation);
-  const rejectInvitation = useInvitationStore((state) => state.rejectInvitation);
+  const {
+    data: receivedInvitations,
+    isLoading: isReceivedLoading,
+  } = useReceivedInvitations();
+  const { data: sentInvitations, isLoading: isSentLoading } = useSentInvitations();
+  const acceptMutation = useAcceptInvitation();
+  const rejectMutation = useRejectInvitation();
 
-  const [acceptTarget, setAcceptTarget] = useState<Invitation | null>(null);
-  const [rejectTarget, setRejectTarget] = useState<Invitation | null>(null);
+  const [target, setTarget] = useState<TripListCardData | null>(null);
 
-  const handleConfirmAccept = () => {
-    if (!acceptTarget) return;
-    acceptInvitation(acceptTarget.id);
-    setAcceptTarget(null);
+  const pendingReceived = (receivedInvitations ?? []).filter((inv) => inv.status === 'PENDING');
+  const pendingSent = (sentInvitations ?? []).filter((inv) => inv.status === 'PENDING');
+
+  const handleReject = () => {
+    if (!target) return;
+    rejectMutation.mutate(Number(target.id), {
+      onSettled: () => setTarget(null),
+    });
   };
 
-  const handleConfirmReject = () => {
-    if (!rejectTarget) return;
-    rejectInvitation(rejectTarget.id);
-    setRejectTarget(null);
+  const handleParticipate = () => {
+    if (!target) return;
+    acceptMutation.mutate(Number(target.id), {
+      onSettled: () => setTarget(null),
+    });
   };
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemedView
-        type="backgroundElement"
-        style={[styles.container, { backgroundColor: TripColors.screenBackground }]}
-      >
-        <SafeAreaView style={styles.safeArea}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            <ThemedText
-              type="subtitle"
-              style={[styles.headerTitle, { color: TripColors.titleText }]}
-            >
-              여행 초대장
-            </ThemedText>
+    <ThemedView style={styles.container}>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.header}>
+          <BackButton />
+          <ThemedText style={styles.headerTitle}>여행 초대장</ThemedText>
+        </View>
 
-            <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionTitle}>
-              초대받은 여행
-            </ThemedText>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <ThemedText style={styles.sectionTitle}>초대받은 여행</ThemedText>
+          {isReceivedLoading ? (
+            <ActivityIndicator style={styles.loading} color="#FF6623" />
+          ) : (
             <View style={styles.list}>
-              {receivedInvitations.map((invitation) => (
-                <InvitationCard
-                  key={invitation.id}
-                  invitation={invitation}
-                  onRequestAccept={setAcceptTarget}
-                  onRequestReject={setRejectTarget}
+              {pendingReceived.map((invitation) => (
+                <TripListCard
+                  key={invitation.courseMemberId}
+                  trip={toReceivedCardData(invitation)}
+                  onPress={setTarget}
                 />
               ))}
+              {pendingReceived.length === 0 ? (
+                <ThemedText style={styles.emptyText}>받은 초대가 없어요</ThemedText>
+              ) : null}
             </View>
+          )}
 
-            <ThemedText type="smallBold" themeColor="textSecondary" style={styles.sectionTitle}>
-              초대한 여행
-            </ThemedText>
+          <ThemedText style={styles.sectionTitle}>초대안 여행</ThemedText>
+          {isSentLoading ? (
+            <ActivityIndicator style={styles.loading} color="#FF6623" />
+          ) : (
             <View style={styles.list}>
-              {sentInvitations.map((invitation) => (
-                <SentInvitationCard key={invitation.id} invitation={invitation} />
+              {pendingSent.map((invitation) => (
+                <TripListCard
+                  key={invitation.courseMemberId}
+                  trip={toSentCardData(invitation)}
+                />
               ))}
+              {pendingSent.length === 0 ? (
+                <ThemedText style={styles.emptyText}>보낸 초대가 없어요</ThemedText>
+              ) : null}
             </View>
-          </ScrollView>
+          )}
+        </ScrollView>
 
-          <ConfirmModal
-            visible={acceptTarget !== null}
-            message="여행 초대를 수락하시겠습니까?"
-            confirmLabel="수락"
-            confirmColor={TripColors.success}
-            onCancel={() => setAcceptTarget(null)}
-            onConfirm={handleConfirmAccept}
-          />
-
-          <ConfirmModal
-            visible={rejectTarget !== null}
-            message="여행 초대를 거부하시겠습니까?"
-            confirmLabel="거부"
-            onCancel={() => setRejectTarget(null)}
-            onConfirm={handleConfirmReject}
-          />
-        </SafeAreaView>
-      </ThemedView>
-    </GestureHandlerRootView>
+        <ParticipateModal
+          visible={target !== null}
+          tripTitle={target?.title ?? ''}
+          onReject={handleReject}
+          onParticipate={handleParticipate}
+        />
+      </SafeAreaView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#FFFFFF',
   },
   safeArea: {
     flex: 1,
   },
-  scrollContent: {
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: Spacing.three,
     paddingTop: Spacing.two,
-    paddingBottom: Spacing.five,
+    paddingBottom: Spacing.three,
+  },
+  backButton: {
+    paddingRight: Spacing.two,
+    paddingVertical: Spacing.one,
   },
   headerTitle: {
-    fontSize: 22,
-    lineHeight: 28,
-    paddingHorizontal: Spacing.four,
-    marginBottom: Spacing.three,
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#222222',
+  },
+  scrollContent: {
+    paddingBottom: Spacing.five,
   },
   sectionTitle: {
     fontSize: 14,
+    fontWeight: '600',
+    color: '#60646C',
     paddingHorizontal: Spacing.four,
     marginBottom: Spacing.two,
   },
   list: {
     marginBottom: Spacing.four,
+  },
+  loading: {
+    marginBottom: Spacing.four,
+  },
+  emptyText: {
+    fontSize: 13,
+    color: '#AAAAAA',
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.two,
   },
 });
