@@ -1,168 +1,133 @@
-import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, View } from 'react-native';
-import CloudyIcon from '@/assets/icon/weather/cloudy.svg';
-import OvercastIcon from '@/assets/icon/weather/overcast.svg';
-import RainyIcon from '@/assets/icon/weather/rainy.svg';
-import SnowIcon from '@/assets/icon/weather/snow.svg';
-
-import SunnyIcon from '@/assets/icon/weather/sunny.svg';
-import ThunderIcon from '@/assets/icon/weather/thunder.svg';
-import { ThemedText } from '@/components/common/themed-text';
-import { ThemedView } from '@/components/common/themed-view';
-import { useHomeStore } from '@/stores/homeStore';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Spacing } from '@/styles/theme';
 
-const ICON_SIZE = 48;
+// Import SVG weather icons from assets/icon/weather
+import SunnyIcon from '@/assets/icon/weather/sunny.svg';
+import CloudyIcon from '@/assets/icon/weather/cloudy.svg';
+import RainyIcon from '@/assets/icon/weather/rainy.svg';
 
-function WeatherIcon({ condition }: { condition: string }) {
-  switch (condition) {
-    case '맑음':
-      return <SunnyIcon width={ICON_SIZE} height={ICON_SIZE} />;
-    case '흐림':
-      return <OvercastIcon width={ICON_SIZE} height={ICON_SIZE} />;
-    case '구름 많음':
-    case '구름 조금':
-      return <CloudyIcon width={ICON_SIZE} height={ICON_SIZE} />;
-    case '비':
-      return <RainyIcon width={ICON_SIZE} height={ICON_SIZE} />;
-    case '눈':
-      return <SnowIcon width={ICON_SIZE} height={ICON_SIZE} />;
-    case '천둥번개':
-      return <ThunderIcon width={ICON_SIZE} height={ICON_SIZE} />;
-    default:
-      return <SunnyIcon width={ICON_SIZE} height={ICON_SIZE} />;
-  }
-}
+const ICON_SIZE = 28;
 
 export function WeatherWidget() {
-  const { weather, setWeather } = useHomeStore();
-
-  const handleRefresh = () => {
-    // Generate slight mock variance
-    const nextTemps = [22, 23, 24, 25, 26];
-    const nextConds = ['맑음', '흐림', '구름 조금', '비', '천둥번개'];
-    const randomTemp = nextTemps[Math.floor(Math.random() * nextTemps.length)];
-    const randomCond = nextConds[Math.floor(Math.random() * nextConds.length)];
-
-    setWeather({
-      temp: randomTemp,
-      condition: randomCond,
-      humidity: Math.floor(Math.random() * 20) + 50,
-      windSpeed: Number.parseFloat((Math.random() * 4 + 1).toFixed(1)),
-    });
-  };
+  // Mock hourly data mapped to matching SVG component imports
+  const hourlyData = [
+    { hour: '11시', temp: '28°', iconComponent: <SunnyIcon width={ICON_SIZE} height={ICON_SIZE} /> },
+    { hour: '12시', temp: '28°', iconComponent: <SunnyIcon width={ICON_SIZE} height={ICON_SIZE} /> },
+    { hour: '13시', temp: '28°', iconComponent: <SunnyIcon width={ICON_SIZE} height={ICON_SIZE} /> },
+    { hour: '14시', temp: '28°', iconComponent: <CloudyIcon width={ICON_SIZE} height={ICON_SIZE} /> },
+    { hour: '15시', temp: '28°', iconComponent: <RainyIcon width={ICON_SIZE} height={ICON_SIZE} /> },
+    { hour: '16시', temp: '28°', iconComponent: <RainyIcon width={ICON_SIZE} height={ICON_SIZE} /> },
+  ];
 
   return (
-    <ThemedView style={styles.container} type="backgroundElement">
-      <ThemedView style={styles.header}>
-        <ThemedView style={styles.titleRow}>
-          <SymbolView name="sun.max.fill" tintColor="#D36D3A" size={20} />
-          <ThemedText type="smallBold" style={styles.title}>
-            실시간 제주 날씨
-          </ThemedText>
-        </ThemedView>
-        <Pressable
-          onPress={handleRefresh}
-          style={({ pressed }) => [styles.refreshBtn, pressed && styles.pressed]}
-        >
-          <SymbolView name="arrow.clockwise" tintColor="#8E8E93" size={14} />
-        </Pressable>
-      </ThemedView>
-
-      <ThemedView style={styles.body}>
-        <View style={styles.iconColumn}>
-          <WeatherIcon condition={weather.condition} />
+    <View style={styles.container}>
+      {/* Top row: Location & Temperature Range */}
+      <View style={styles.headerRow}>
+        <View style={styles.locationContainer}>
+          <Text style={styles.pinIcon}>📍</Text>
+          <Text style={styles.locationText}>제주특별자치도 안덕면</Text>
         </View>
+        <View style={styles.tempRangeContainer}>
+          <Text style={styles.lowTemp}>26°</Text>
+          <Text style={styles.tempDivider}> / </Text>
+          <Text style={styles.highTemp}>30°</Text>
+        </View>
+      </View>
 
-        <ThemedView style={styles.tempColumn}>
-          <ThemedText style={styles.tempText}>{weather.temp}°C</ThemedText>
-          <ThemedText type="small" themeColor="textSecondary">
-            {weather.condition}
-          </ThemedText>
-        </ThemedView>
+      {/* Hourly weather row */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.hourlyContainer}
+      >
+        {hourlyData.map((item, idx) => (
+          <View key={idx} style={styles.hourCell}>
+            <Text style={styles.hourText}>{item.hour}</Text>
+            
+            {/* Render actual weather SVG icons */}
+            <View style={styles.iconWrapper}>
+              {item.iconComponent}
+            </View>
 
-        <ThemedView style={styles.divider} />
-
-        <ThemedView style={styles.infoColumn}>
-          <ThemedView style={styles.infoRow}>
-            <ThemedText type="small" themeColor="textSecondary">
-              습도
-            </ThemedText>
-            <ThemedText type="smallBold">{weather.humidity}%</ThemedText>
-          </ThemedView>
-          <ThemedView style={styles.infoRow}>
-            <ThemedText type="small" themeColor="textSecondary">
-              풍속
-            </ThemedText>
-            <ThemedText type="smallBold">{weather.windSpeed} m/s</ThemedText>
-          </ThemedView>
-        </ThemedView>
-      </ThemedView>
-    </ThemedView>
+            <Text style={styles.hourTempText}>{item.temp}</Text>
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
+    marginHorizontal: 0, // Expanded to container edges
     padding: Spacing.four,
-    borderRadius: 16,
-    alignSelf: 'stretch',
-    gap: Spacing.three,
+    borderRadius: 20,
+    backgroundColor: '#FAF8F6',
+    borderWidth: 1,
+    borderColor: '#E5E5EA',
   },
-  header: {
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: 'transparent',
+    marginBottom: Spacing.four,
   },
-  titleRow: {
+  locationContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.one,
-    backgroundColor: 'transparent',
+    gap: 4,
   },
-  title: {
+  pinIcon: {
     fontSize: 16,
   },
-  refreshBtn: {
-    padding: Spacing.one,
+  locationText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#1C1C1E',
   },
-  pressed: {
-    opacity: 0.6,
-  },
-  body: {
+  tempRangeContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: 'transparent',
   },
-  iconColumn: {
-    marginRight: Spacing.two,
+  lowTemp: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#007AFF',
   },
-  tempColumn: {
-    flex: 1,
-    gap: Spacing.one,
-    backgroundColor: 'transparent',
+  tempDivider: {
+    fontSize: 16,
+    color: '#8E8E93',
   },
-  tempText: {
-    fontSize: 32,
-    fontWeight: '700',
-    lineHeight: 38,
+  highTemp: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FF3B30',
   },
-  divider: {
-    width: 1,
-    height: 40,
-    backgroundColor: '#E5E5EA',
-    marginHorizontal: Spacing.two,
-  },
-  infoColumn: {
-    gap: Spacing.two,
-    backgroundColor: 'transparent',
-    minWidth: 100,
-  },
-  infoRow: {
+  hourlyContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    backgroundColor: 'transparent',
+    paddingVertical: Spacing.one,
+    width: '100%',
+  },
+  hourCell: {
+    alignItems: 'center',
+    width: 52,
+    gap: 8,
+  },
+  hourText: {
+    fontSize: 13,
+    color: '#1C1C1E',
+    fontWeight: '500',
+  },
+  iconWrapper: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hourTempText: {
+    fontSize: 13,
+    color: '#1C1C1E',
+    fontWeight: '600',
   },
 });
