@@ -415,19 +415,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFF2EB',
     borderWidth: 1,
-    borderColor: '#FF8A00',
+    borderColor: '#E06635',
     borderRadius: 14,
     paddingHorizontal: Spacing.three,
     height: 44,
     gap: 4,
   },
   dropdownBtnText: {
-    color: '#FF8A00',
+    color: '#E06635',
     fontSize: 13,
     fontWeight: 'bold',
   },
   dropdownChevron: {
-    color: '#FF8A00',
+    color: '#E06635',
     fontSize: 10,
   },
   dropdownMenu: {
@@ -460,7 +460,7 @@ const styles = StyleSheet.create({
     color: '#1C1C1E',
   },
   dropdownItemTextActive: {
-    color: '#FF8A00',
+    color: '#E06635',
     fontWeight: 'bold',
   },
   dropdownOverlay: {
@@ -486,8 +486,8 @@ const styles = StyleSheet.create({
     borderColor: '#E5E5EA',
   },
   subCategoryBtnSelected: {
-    backgroundColor: '#FF6623',
-    borderColor: '#FF6623',
+    backgroundColor: '#E06635',
+    borderColor: '#E06635',
   },
   subCategoryText: {
     fontSize: 12,
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
     color: '#1C1C1E',
   },
   addBtn: {
-    backgroundColor: '#FF6623',
+    backgroundColor: '#E06635',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 12,
@@ -649,7 +649,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF8F6',
   },
   accCircleBadgeActive: {
-    borderColor: '#FF6623',
+    borderColor: '#E06635',
     backgroundColor: '#FFF2EB',
   },
   accCircleText: {
@@ -657,7 +657,7 @@ const styles = StyleSheet.create({
     color: '#8E8E93',
   },
   accCircleTextActive: {
-    color: '#FF6623',
+    color: '#E06635',
     fontWeight: 'bold',
   },
   // Pet-friendly layout details
@@ -672,13 +672,13 @@ const styles = StyleSheet.create({
   petTagBadge: {
     backgroundColor: '#FFF2EB',
     borderWidth: 1,
-    borderColor: '#FF8A00',
+    borderColor: '#E06635',
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 4,
   },
   petTagText: {
-    color: '#FF8A00',
+    color: '#E06635',
     fontSize: 12,
     fontWeight: 'bold',
   },

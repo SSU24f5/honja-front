@@ -278,7 +278,7 @@ const styles = StyleSheet.create({
     color: '#1C1C1E',
   },
   logoutBtn: {
-    backgroundColor: '#FF8A00',
+    backgroundColor: '#E06635',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   saveBtn: {
-    backgroundColor: '#FF6623',
+    backgroundColor: '#E06635',
     height: 52,
     borderRadius: 16,
     alignItems: 'center',
@@ -429,7 +429,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 48,
     borderRadius: 12,
-    backgroundColor: '#FF6623',
+    backgroundColor: '#E06635',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   avatarGridItemActive: {
-    borderColor: '#FF6623',
+    borderColor: '#E06635',
   },
   avatarGridImage: {
     width: '100%',

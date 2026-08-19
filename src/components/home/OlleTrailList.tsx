@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   eventDates: {
     fontSize: 11,
-    color: '#D36D3A',
+    color: '#E06635',
     fontWeight: '600',
   },
   eventLocation: {
