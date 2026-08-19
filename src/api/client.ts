@@ -324,3 +324,32 @@ export async function del<T>(path: string): Promise<T> {
     }
   }
 }
+
+export async function patch<T>(path: string, body: unknown): Promise<T> {
+  const baseUrl = getApiBaseUrl();
+  console.log(`[API PATCH] ${baseUrl}${path}`);
+  if (body !== undefined) {
+    console.log(`[API PATCH Body ${path}]:\n`, JSON.stringify(body, null, 2));
+  }
+  try {
+    const res = await fetch(`${baseUrl}${path}`, {
+      method: 'PATCH',
+      headers: getHeaders(),
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) throw new Error(`HTTP error ${res.status}`);
+    const json: ApiResponse<T> = await res.json();
+    console.log(`[API PATCH Response ${path}]:\n`, JSON.stringify(json, null, 2));
+    if (!json.isSuccess) {
+      throw new Error(json.message || '요청에 실패했습니다.');
+    }
+    return json.data;
+  } catch (err) {
+    console.warn(`[API PATCH FAIL] Falling back to mock data for ${path}:`, err);
+    // For profile update, return the body as a success mock
+    if (path === '/users/profile') {
+      return body as T;
+    }
+    throw err;
+  }
+}

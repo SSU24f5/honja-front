@@ -7,24 +7,37 @@ export interface CourseInvitationResponseDto {
   courseId: number;
   courseName: string;
   courseDescription: string;
-  counterpartNickname: string;
-  counterpartEmail: string;
+  inviterName: string;
+  inviterEmail: string;
   createdAt: string;
   status: InviteStatus;
 }
 
-export function getReceivedInvitations(): Promise<CourseInvitationResponseDto[]> {
-  return get<CourseInvitationResponseDto[]>('/invitations/received');
+export interface CourseInvitationExistenceResponseDto {
+  hasPendingInvitations: boolean;
 }
 
-export function getSentInvitations(): Promise<CourseInvitationResponseDto[]> {
-  return get<CourseInvitationResponseDto[]>('/invitations/sent');
+/** GET /courses/invitations — 내가 받은 초대 목록 */
+export function getMyInvitations() {
+  return get<CourseInvitationResponseDto[]>('/courses/invitations');
 }
 
-export function acceptInvitation(invitationId: number): Promise<void> {
-  return post<void>(`/invitations/${invitationId}/accept`, undefined);
+/** GET /courses/invitations/exists — 대기 중인 초대 존재 여부 */
+export function hasPendingInvitations() {
+  return get<CourseInvitationExistenceResponseDto>('/courses/invitations/exists');
 }
 
-export function rejectInvitation(invitationId: number): Promise<void> {
-  return post<void>(`/invitations/${invitationId}/reject`, undefined);
+/** POST /courses/invitations — 이메일로 멤버 초대 */
+export function inviteMember(courseId: number, email: string) {
+  return post<string>('/courses/invitations', { courseId, email });
+}
+
+/** POST /courses/invitations/{courseMemberId}/accept — 초대 수락 */
+export function acceptInvitation(courseMemberId: number) {
+  return post<string>(`/courses/invitations/${courseMemberId}/accept`, {});
+}
+
+/** POST /courses/invitations/{courseMemberId}/reject — 초대 거절 */
+export function rejectInvitation(courseMemberId: number) {
+  return post<string>(`/courses/invitations/${courseMemberId}/reject`, {});
 }
