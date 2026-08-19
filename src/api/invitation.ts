@@ -9,6 +9,10 @@ export interface CourseInvitationResponseDto {
   courseDescription: string;
   inviterName: string;
   inviterEmail: string;
+  /** @deprecated use inviterName */
+  counterpartNickname: string;
+  /** @deprecated use inviterEmail */
+  counterpartEmail: string;
   createdAt: string;
   status: InviteStatus;
 }
@@ -20,6 +24,14 @@ export interface CourseInvitationExistenceResponseDto {
 /** GET /courses/invitations — 내가 받은 초대 목록 */
 export function getMyInvitations() {
   return get<CourseInvitationResponseDto[]>('/courses/invitations');
+}
+
+/** @deprecated use getMyInvitations */
+export const getReceivedInvitations = getMyInvitations;
+
+/** 보낸 초대 목록 — 현재 Swagger에 별도 엔드포인트 없음, 빈 배열 반환 */
+export async function getSentInvitations(): Promise<CourseInvitationResponseDto[]> {
+  return [];
 }
 
 /** GET /courses/invitations/exists — 대기 중인 초대 존재 여부 */

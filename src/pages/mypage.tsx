@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Modal,
@@ -16,6 +17,7 @@ import { useRouter } from 'expo-router';
 import { useTheme } from '@/hooks/use-theme';
 import { useAuthStore } from '@/stores/auth-store';
 import { BottomTabInset, Spacing } from '@/styles/theme';
+import { updateProfile, deleteUser } from '@/api/auth';
 
 export default function MyPageScreen() {
   const safeAreaInsets = useSafeAreaInsets();
@@ -37,6 +39,8 @@ export default function MyPageScreen() {
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [showAvatarModal, setShowAvatarModal] = useState(false);
   const [isPasswordChangeEnabled, setIsPasswordChangeEnabled] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Preset avatar images list
   const avatarPresets = [
@@ -58,20 +62,61 @@ export default function MyPageScreen() {
     router.replace('/welcome' as any);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (isPasswordChangeEnabled && !confirmPassword.trim()) {
       const msg = '비밀번호 재입력을 입력해 주세요.';
       if (Platform.OS === 'web') window.alert(msg);
       else Alert.alert('알림', msg);
       return;
     }
-    const successMsg = '프로필 정보가 저장되었습니다.';
-    if (Platform.OS === 'web') window.alert(successMsg);
-    else Alert.alert('성공', successMsg);
+    setIsSaving(true);
+    try {
+      await updateProfile({
+        nickname,
+        email,
+        ...(isPasswordChangeEnabled ? { code: password } : {}),
+      });
+      const successMsg = '프로필 정보가 저장되었습니다.';
+      if (Platform.OS === 'web') window.alert(successMsg);
+      else Alert.alert('성공', successMsg);
+      setIsPasswordChangeEnabled(false);
+      setConfirmPassword('');
+    } catch (e: any) {
+      const msg = e?.message ?? '저장에 실패했습니다.';
+      if (Platform.OS === 'web') window.alert(msg);
+      else Alert.alert('오류', msg);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
-    // Reset password change state on save success
-    setIsPasswordChangeEnabled(false);
-    setConfirmPassword('');
+  const handleDeleteAccount = () => {
+    const confirm = () => {
+      setIsDeleting(true);
+      deleteUser()
+        .then(() => {
+          clearToken();
+          router.replace('/welcome' as any);
+        })
+        .catch((e: any) => {
+          const msg = e?.message ?? '계정 삭제에 실패했습니다.';
+          if (Platform.OS === 'web') window.alert(msg);
+          else Alert.alert('오류', msg);
+        })
+        .finally(() => setIsDeleting(false));
+    };
+    if (Platform.OS === 'web') {
+      if (window.confirm('정말로 계정을 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.')) confirm();
+    } else {
+      Alert.alert(
+        '계정 삭제',
+        '정말로 계정을 삭제하시겠습니까?\n이 작업은 되돌릴 수 없습니다.',
+        [
+          { text: '취소', style: 'cancel' },
+          { text: '삭제', style: 'destructive', onPress: confirm },
+        ],
+      );
+    }
   };
 
   const handlePasswordPress = () => {
@@ -178,9 +223,23 @@ export default function MyPageScreen() {
           {/* 저장하기 버튼 */}
           <Pressable
             onPress={handleSave}
-            style={({ pressed }) => [styles.saveBtn, pressed && styles.pressed]}
+            disabled={isSaving}
+            style={({ pressed }) => [styles.saveBtn, pressed && styles.pressed, isSaving && { opacity: 0.7 }]}
           >
-            <Text style={styles.saveBtnText}>저장하기</Text>
+            {isSaving
+              ? <ActivityIndicator color="#FFF" />
+              : <Text style={styles.saveBtnText}>저장하기</Text>}
+          </Pressable>
+
+          {/* 계정 삭제 버튼 */}
+          <Pressable
+            onPress={handleDeleteAccount}
+            disabled={isDeleting}
+            style={({ pressed }) => [styles.deleteBtn, pressed && styles.pressed, isDeleting && { opacity: 0.7 }]}
+          >
+            {isDeleting
+              ? <ActivityIndicator color="#E06635" />
+              : <Text style={styles.deleteBtnText}>계정 삭제</Text>}
           </Pressable>
         </View>
       </ScrollView>
@@ -371,6 +430,20 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  deleteBtn: {
+    height: 48,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#E06635',
+    marginTop: Spacing.two,
+  },
+  deleteBtnText: {
+    color: '#E06635',
+    fontSize: 14,
+    fontWeight: '600',
   },
   pressed: {
     opacity: 0.85,

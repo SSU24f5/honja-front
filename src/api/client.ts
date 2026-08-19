@@ -195,8 +195,42 @@ function getMockDataFallback(method: string, path: string, body?: any): any {
       return '삭제에 성공했습니다.';
     }
   }
+  if (path.startsWith('/api/weather/')) {
+    return {
+      region: '제주특별자치도 안덕면',
+      weatherType: 'SUNNY',
+      temperature: 28,
+      dustGrade: '보통',
+      pm10Value: 40,
+      pm25Value: 15,
+      recommendation: 'OUTDOOR',
+      weatherDataReliable: false,
+      places: [],
+    };
+  }
+  if (path.startsWith('/location/') || path.startsWith('/tour/')) {
+    return { count: 0, items: [] };
+  }
+  if (path.startsWith('/courses/invitations') || path === '/courses/invitations') {
+    if (method === 'GET') return [];
+    if (method === 'POST') return '초대를 보냈습니다.';
+    return null;
+  }
+  if (path === '/users/profile' && method === 'PATCH') {
+    return body;
+  }
+  if (path === '/users/delete' && method === 'DELETE') {
+    return {};
+  }
+  if (path === '/terms' || path === '/terms/me') {
+    return [];
+  }
+  if (path === '/auth/email/send') {
+    return null;
+  }
   throw new Error(`지원하지 않는 Mock API 경로입니다: ${method} ${path}`);
 }
+
 
 export async function post<T>(path: string, body: unknown): Promise<T> {
   const baseUrl = getApiBaseUrl();
