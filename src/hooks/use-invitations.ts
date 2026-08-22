@@ -1,9 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   acceptInvitation,
+  getMyInvitations,
   getReceivedInvitations,
   getSentInvitations,
   rejectInvitation,
+  type CourseInvitationResponseDto,
 } from '@/api/invitation';
 import { MY_COURSES_QUERY_KEY } from './use-my-courses';
 
@@ -11,14 +13,14 @@ export const RECEIVED_INVITATIONS_QUERY_KEY = ['invitations', 'received'] as con
 export const SENT_INVITATIONS_QUERY_KEY = ['invitations', 'sent'] as const;
 
 export function useReceivedInvitations() {
-  return useQuery({
+  return useQuery<CourseInvitationResponseDto[]>({
     queryKey: RECEIVED_INVITATIONS_QUERY_KEY,
     queryFn: getReceivedInvitations,
   });
 }
 
 export function useSentInvitations() {
-  return useQuery({
+  return useQuery<CourseInvitationResponseDto[]>({
     queryKey: SENT_INVITATIONS_QUERY_KEY,
     queryFn: getSentInvitations,
   });

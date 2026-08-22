@@ -1,167 +1,107 @@
-import { SymbolView } from 'expo-symbols';
-import { Pressable, StyleSheet, View } from 'react-native';
-import { ThemedText } from '@/components/common/themed-text';
-import { ThemedView } from '@/components/common/themed-view';
-import { type OlleTrail, useHomeStore } from '@/stores/homeStore';
+import { Image, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Spacing } from '@/styles/theme';
 
 export function OlleTrailList() {
-  const { trails, toggleTrailCompleted } = useHomeStore();
-
-  const getDifficultyColor = (diff: OlleTrail['difficulty']) => {
-    switch (diff) {
-      case '상':
-        return '#FF3B30';
-      case '중':
-        return '#FF9500';
-      case '하':
-        return '#34C759';
-    }
-  };
+  const events = [
+    {
+      id: 'event-1',
+      title: '뜻을 품은 그림',
+      dates: '2026.03.24. ~ 08.23.',
+      location: '제주현대미술관',
+      imageUrl: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?w=500',
+    },
+    {
+      id: 'event-2',
+      title: '내꿈은 응원단장\nKBO 981 리그',
+      dates: '2026.07.10. ~ 09.28.',
+      location: '제주종합경기장',
+      imageUrl: 'https://images.unsplash.com/photo-1530541930197-ff16ac917b0e?w=500',
+    },
+  ];
 
   return (
-    <ThemedView style={styles.container}>
-      <ThemedView style={styles.header}>
-        <ThemedView style={styles.headerLeft}>
-          <SymbolView name="shoeprints.fill" tintColor="#D36D3A" size={20} />
-          <ThemedText type="smallBold" style={styles.title}>
-            제주 올레길 코스 추천
-          </ThemedText>
-        </ThemedView>
-        <Pressable style={({ pressed }) => pressed && styles.pressed}>
-          <ThemedText type="small" themeColor="brandPrimary" style={styles.moreLink}>
-            전체 보기
-          </ThemedText>
-        </Pressable>
-      </ThemedView>
-
-      <View style={styles.list}>
-        {trails.map((trail) => (
-          <Pressable
-            key={trail.id}
-            onPress={() => toggleTrailCompleted(trail.id)}
-            style={({ pressed }) => [
-              styles.card,
-              trail.completed && styles.cardCompleted,
-              pressed && styles.pressed,
-            ]}
-          >
-            <ThemedView style={styles.cardHeader}>
-              <ThemedView style={styles.badgeRow}>
-                <ThemedText type="code" style={styles.courseNum}>
-                  코스 {trail.courseNumber}
-                </ThemedText>
-                <ThemedView
-                  style={[
-                    styles.diffBadge,
-                    { backgroundColor: getDifficultyColor(trail.difficulty) },
-                  ]}
-                >
-                  <ThemedText style={styles.diffText}>{trail.difficulty}</ThemedText>
-                </ThemedView>
-              </ThemedView>
-              {trail.completed && (
-                <SymbolView name="checkmark.circle.fill" tintColor="#D36D3A" size={18} />
-              )}
-            </ThemedView>
-
-            <ThemedText type="smallBold" style={styles.trailName}>
-              {trail.name}
-            </ThemedText>
-            <ThemedText type="small" themeColor="textSecondary" style={styles.desc}>
-              {trail.description}
-            </ThemedText>
-
-            <ThemedText type="code" themeColor="textSecondary" style={styles.distance}>
-              거리: {trail.distance}
-            </ThemedText>
-          </Pressable>
-        ))}
+    <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.title}>인기 행사 & 전시</Text>
       </View>
-    </ThemedView>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContainer}
+      >
+        {events.map((event) => (
+          <View key={event.id} style={styles.posterCard}>
+            <Image source={{ uri: event.imageUrl }} style={styles.posterImage} />
+            <View style={styles.infoContainer}>
+              <Text style={styles.eventTitle} numberOfLines={2}>
+                {event.title}
+              </Text>
+              <Text style={styles.eventDates}>{event.dates}</Text>
+              <Text style={styles.eventLocation}>{event.location}</Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: 'stretch',
-    gap: Spacing.two,
+    marginVertical: Spacing.two,
     backgroundColor: 'transparent',
   },
   header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
     paddingHorizontal: Spacing.four,
-    marginBottom: Spacing.one,
-  },
-  headerLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.one,
-    backgroundColor: 'transparent',
-  },
-  moreLink: {
-    fontSize: 12,
-    fontWeight: 'bold',
+    marginBottom: Spacing.three,
   },
   title: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#1C1C1E',
   },
-  list: {
-    gap: Spacing.three,
+  scrollContainer: {
+    paddingHorizontal: Spacing.four,
+    gap: Spacing.four,
+    paddingBottom: Spacing.two,
   },
-  card: {
+  posterCard: {
+    width: 170,
     backgroundColor: '#FFFFFF',
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: '#E5E5EA',
-    borderRadius: 14,
+    overflow: 'hidden',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 6,
+    elevation: 2,
+  },
+  posterImage: {
+    width: '100%',
+    height: 180,
+    resizeMode: 'cover',
+  },
+  infoContainer: {
     padding: Spacing.three,
-    gap: Spacing.one,
+    gap: 4,
   },
-  cardCompleted: {
-    borderColor: '#D36D3A',
-    backgroundColor: '#FAF2EE',
-  },
-  pressed: {
-    opacity: 0.8,
-  },
-  cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.one,
-    backgroundColor: 'transparent',
-  },
-  courseNum: {
-    fontSize: 11,
-    color: '#D36D3A',
+  eventTitle: {
+    fontSize: 14,
     fontWeight: 'bold',
+    color: '#1C1C1E',
+    lineHeight: 18,
+    height: 36, // Fixed height for 2 lines alignment
   },
-  diffBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-  },
-  diffText: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: 'bold',
-  },
-  trailName: {
-    fontSize: 15,
-  },
-  desc: {
-    fontSize: 13,
-  },
-  distance: {
+  eventDates: {
     fontSize: 11,
-    marginTop: Spacing.one,
+    color: '#E06635',
+    fontWeight: '600',
+  },
+  eventLocation: {
+    fontSize: 11,
+    color: '#8E8E93',
   },
 });

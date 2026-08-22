@@ -6,6 +6,22 @@ export interface RoutePlace {
   name: string;
   category: string;
   address: string;
+  
+  // Optional properties for flexible UI routing support
+  day?: number;
+  type?: 'start' | 'waypoint' | 'end';
+  coursePlaceId?: number;
+  placeId?: number;
+  contentId?: string;
+  contentTypeId?: string;
+  cat3?: string;
+  image?: string;
+  isPetPlace?: boolean;
+  isBarrierFree?: boolean;
+  mapx?: string;
+  mapy?: string;
+  placeType?: string;
+  title?: string;
 }
 
 export interface SavedRoute {
@@ -14,7 +30,10 @@ export interface SavedRoute {
   dates: string;
   duration: string;
   /** 동행유형 뱃지 예: '일반' / '배리어프리' / '애인과 함께' */
-  tag: string;
+  tag?: string;
+  tags?: string[];
+  theme?: string;
+  companion?: string;
   /** '셋이왓수다' 카드처럼 부제 문구가 있는 경우 */
   description?: string;
   /**
@@ -35,8 +54,9 @@ interface RouteState {
   movePlaceUp: (index: number) => void;
   movePlaceDown: (index: number) => void;
   clearItinerary: () => void;
-  createRoute: (name: string, dates: string, duration: string) => void;
+  createRoute: (name: string, dates: string, duration: string, theme?: string, companion?: string) => void;
   deleteRoute: (id: string) => void;
+  updateRouteItinerary: (id: string, newItinerary: RoutePlace[]) => void;
 }
 
 export const useRouteStore = create<RouteState>((set) => ({
@@ -146,14 +166,16 @@ export const useRouteStore = create<RouteState>((set) => ({
     set({
       itinerary: [],
     }),
-  createRoute: (name, dates, duration) =>
+  createRoute: (name, dates, duration, theme, companion) =>
     set((state) => {
       const newRoute: SavedRoute = {
         id: `route-${Date.now()}`,
         name,
         dates,
         duration,
-        tag: '일반',
+        tag: theme || '일반',
+        theme: theme || '일반',
+        companion: companion || '혼자',
         itinerary: [...state.itinerary],
       };
       return {
@@ -164,5 +186,11 @@ export const useRouteStore = create<RouteState>((set) => ({
   deleteRoute: (id) =>
     set((state) => ({
       savedRoutes: state.savedRoutes.filter((r) => r.id !== id),
+    })),
+  updateRouteItinerary: (id, newItinerary) =>
+    set((state) => ({
+      savedRoutes: state.savedRoutes.map((r) =>
+        r.id === id ? { ...r, itinerary: newItinerary } : r
+      ),
     })),
 }));

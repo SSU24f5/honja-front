@@ -92,6 +92,26 @@ function getCourseTypeLabel(type?: string): string {
   }
 }
 
+function convertLocalItineraryToDayPlans(itinerary: RoutePlace[]): Record<number, DayPlan> {
+  const plans: Record<number, DayPlan> = {};
+  for (const place of itinerary) {
+    const day = place.day ?? 0;
+    if (!plans[day]) {
+      plans[day] = { start: null, waypoints: [], end: null };
+    }
+    if (place.type === 'start') {
+      plans[day].start = place;
+    } else if (place.type === 'end') {
+      plans[day].end = place;
+    } else {
+      if (!plans[day].waypoints.some(wp => wp.id === place.id)) {
+        plans[day].waypoints.push(place);
+      }
+    }
+  }
+  return plans;
+}
+
 function convertCourseDetailToDayPlans(detail: CourseDetailResponseDto): Record<number, DayPlan> {
   const plans: Record<number, DayPlan> = {};
 
@@ -181,48 +201,6 @@ export default function RouteScreen() {
     enabled: !!selectedRouteId && numericRouteId > 0 && step !== 'list',
   });
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Reset selected tab on route change
-  useEffect(() => {
-    setStoreRouteId(selectedRouteId);
-  }, [selectedRouteId]);
-
-  // API 상세 코스 데이터를 받아왔을 때 dayPlans 스토어에 장소 데이터 자동 세팅
-  useEffect(() => {
-    if (courseDetail && courseDetail.dates && courseDetail.dates.length > 0) {
-      const plans = convertCourseDetailToDayPlans(courseDetail);
-      useDayPlanningStore.setState({ dayPlans: plans });
-    }
-  }, [courseDetail]);
-
-  // Handle back press in search modal
-  useEffect(() => {
-    if (!searchModalVisible) return;
-    const backAction = () => {
-      closeSearch();
-      return true;
-    };
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    return () => backHandler.remove();
-  }, [searchModalVisible, closeSearch]);
-
-  const insets = {
-    ...safeAreaInsets,
-    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
-  };
-
-  const contentPlatformStyle = Platform.select({
-    android: {
-      paddingTop: insets.top,
-      paddingLeft: insets.left,
-      paddingRight: insets.right,
-      paddingBottom: insets.bottom,
-    },
-    web: {
-      paddingTop: Spacing.six,
-      paddingBottom: Spacing.four,
-    },
-  });
-
   const selectedRoute = useMemo(() => {
     if (courseDetail) {
       let duration = '';
@@ -288,6 +266,51 @@ export default function RouteScreen() {
 
     return null;
   }, [courseDetail, savedRoutes, apiCourses, selectedRouteId]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Reset selected tab on route change
+  useEffect(() => {
+    setStoreRouteId(selectedRouteId);
+  }, [selectedRouteId]);
+
+  // API 상세 코스 데이터 또는 로컬 코스 데이터를 받았을 때 dayPlans 스토어에 장소 데이터 자동 세팅
+  useEffect(() => {
+    if (courseDetail && courseDetail.dates && courseDetail.dates.length > 0) {
+      const plans = convertCourseDetailToDayPlans(courseDetail);
+      useDayPlanningStore.setState({ dayPlans: plans });
+    } else if (!courseDetail && selectedRoute && selectedRoute.itinerary) {
+      const plans = convertLocalItineraryToDayPlans(selectedRoute.itinerary);
+      useDayPlanningStore.setState({ dayPlans: plans });
+    }
+  }, [courseDetail, selectedRoute]);
+
+  // Handle back press in search modal
+  useEffect(() => {
+    if (!searchModalVisible) return;
+    const backAction = () => {
+      closeSearch();
+      return true;
+    };
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+    return () => backHandler.remove();
+  }, [searchModalVisible, closeSearch]);
+
+  const insets = {
+    ...safeAreaInsets,
+    bottom: safeAreaInsets.bottom + BottomTabInset + Spacing.three,
+  };
+
+  const contentPlatformStyle = Platform.select({
+    android: {
+      paddingTop: insets.top,
+      paddingLeft: insets.left,
+      paddingRight: insets.right,
+      paddingBottom: insets.bottom,
+    },
+    web: {
+      paddingTop: Spacing.six,
+      paddingBottom: Spacing.four,
+    },
+  });
 
   // Parse days from selected route dates
   const { daysList, month } = useMemo(() => {

@@ -1,5 +1,6 @@
 import { Button } from '@/components/common/button';
 import { useTheme } from '@/hooks/use-theme';
+import { useAuthStore } from '@/stores/auth-store';
 import { Spacing } from '@/styles/theme';
 import { useRouter } from 'expo-router';
 import { StyleSheet, Text, View } from 'react-native';
@@ -8,6 +9,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 export default function WelcomeScreen() {
   const theme = useTheme();
   const router = useRouter();
+  const setToken = useAuthStore((state) => state.setToken);
 
   return (
     <SafeAreaView style={[styles.safeArea, { backgroundColor: theme.background }]}>
@@ -22,6 +24,14 @@ export default function WelcomeScreen() {
             label="로그인 하기"
             onPress={() => router.push('/login' as any)}
             variant="primary"
+          />
+          <Button
+            label="둘러보기 (임시 로그인)"
+            onPress={() => {
+              setToken('mock-token');
+              router.replace('/');
+            }}
+            variant="secondary"
           />
           <Button
             label="회원가입 하기"
